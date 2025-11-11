@@ -6,6 +6,15 @@
     "username": "Username",
     "password": "Password",
     "loginError": "Login failed. Please try again.",
-    "registerButtonText": "Register",
-    "loginButtonText": "Login"
+    "register": "Register",
+    "login": "Login",
+    "name": "Name",
+    "surname": "Surname",
+    "user": "User",
+    "mail": "Mail",
+    "urlPfp": "Profile Picture URL",
+    "confirmPassword": "Confirm Password",
+    "invalidEmail": "Invalid email address",
+    "invalidUrl": "Invalid profile picture URL",
+    "passwordMismatch": "Passwords do not match"
 }

@@ -1,11 +1,20 @@
 {
   "@@locale": "es",
-  "appName": "SynHub"
+  "appName": "SynHub",
   "insertUsername": "Inserte Nombre de Usuario",
   "insertPassword": "Inserte Contraseña",
   "username": "Nombre de Usuario",
   "password": "Contraseña",
   "loginError": "Error al iniciar sesión. Por favor, inténtelo de nuevo.",
-  "registerButtonText": "Registrarse",
-  "loginButtonText": "Iniciar Sesión"
+  "register": "Registrarse",
+  "login": "Iniciar Sesión",
+  "name": "Nombre",
+  "surname": "Apellido",
+  "user": "Usuario",
+  "mail": "Correo Electrónico",
+  "urlPfp": "URL de Foto de Perfil",
+  "confirmPassword": "Confirmar Contraseña",
+  "invalidEmail": "Correo electrónico no válido",
+  "invalidUrl": "URL de foto de perfil no válida",
+  "passwordMismatch": "Las contraseñas no coinciden"
 }

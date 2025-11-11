@@ -104,7 +104,7 @@ class _LoginState extends State<Login> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    localizations.loginButtonText,
+                    localizations.login,
                     style: const TextStyle(
                       fontSize: 20,
                       color: Color(0xFF000000),
@@ -173,7 +173,7 @@ class _LoginState extends State<Login> {
                       child: state is AuthLoading
                           ? const CircularProgressIndicator(color: Colors.white)
                           : Text(
-                        localizations.loginButtonText,
+                        localizations.login,
                         style: TextStyle(
                           fontSize: 20,
                           color: Colors.white,
@@ -208,7 +208,7 @@ class _LoginState extends State<Login> {
                           ),
                         ),
                         child: Text(
-                          localizations.registerButtonText,
+                          localizations.register,
                           style: TextStyle(
                             fontSize: 20,
                             color: Colors.black,
