@@ -454,6 +454,7 @@ class _CustomDrawer extends StatelessWidget {
             const Divider(color: Colors.white),
             const SizedBox(height: gap),
             LanguageSwitcherButton(),
+            const SizedBox(height: gap),
             const Divider(color: Colors.white),
             const SizedBox(height: gap),
             const SizedBox(height: gap),

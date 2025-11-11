@@ -75,5 +75,7 @@
   "clear": "Limpiar",
   "requestClearedSuccess": "Solicitud limpiada correctamente",
   "requestClearedFailure": "Error al limpiar la solicitud",
-  "comment": "Comentario"
+  "comment": "Comentario",
+  "commentHint": "Escribe tu comentario aquí...",
+  "commentEmptyError": "Por favor, escribe un comentario"
 }

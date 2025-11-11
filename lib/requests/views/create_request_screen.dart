@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:synhub_flutter/requests/bloc/request_bloc.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../tasks/bloc/task/task_event.dart';
 import '../../tasks/bloc/task/task_bloc.dart';
 import '../../tasks/bloc/task/task_state.dart';
@@ -32,6 +33,7 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return MultiBlocProvider(
         providers: [
           BlocProvider(
@@ -60,7 +62,7 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
               } else if (state is TaskError) {
                 return Center(child: Text(state.message));
               }
-              return const Center(child: Text('No se encontró la tarea'));
+              return Center(child: Text(localizations.taskNotFound));
             },
           ),
         )
@@ -70,6 +72,7 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
   Widget _buildTaskCard(BuildContext context, Task task) {
     final progressColor = _getDividerColor(task.createdAt, task.dueDate);
     final formattedDates = _formatTaskDates(task);
+    final localizations = AppLocalizations.of(context)!;
 
     return Padding(
       padding: const EdgeInsets.all(20.0),
@@ -126,9 +129,9 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
                 controller: _commentController,
                 maxLines: 3,
                 decoration: InputDecoration(
-                  labelText: 'Comentario',
+                  labelText: localizations.comment,
                   border: OutlineInputBorder(),
-                  hintText: 'Escribe tu comentario aquí...',
+                  hintText: localizations.commentHint,
                 ),
               ),
               const SizedBox(height: 12),
@@ -154,7 +157,7 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
                       Navigator.push(context, MaterialPageRoute(builder: (context) => const TasksScreen()));
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Por favor, escribe un comentario')),
+                        SnackBar(content: Text(localizations.commentEmptyError)),
                       );
                     }
                   },
@@ -164,7 +167,7 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: Text("Enviar comentario", style: TextStyle(fontSize: 18, color: Colors.white)),
+                  child: Text(localizations.sendComment, style: TextStyle(fontSize: 18, color: Colors.white)),
                 ),
               ),
             ],

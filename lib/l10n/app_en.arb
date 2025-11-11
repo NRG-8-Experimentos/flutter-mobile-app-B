@@ -76,5 +76,7 @@
     "clear": "Clear",
     "requestClearedSuccess": "Request cleared successfully",
     "requestClearedFailure": "Failed to clear request",
-    "comment": "Comment"
+    "comment": "Comment",
+    "commentHint": "Write your comment here...",
+    "commentEmptyError": "Please write a comment"
 }
