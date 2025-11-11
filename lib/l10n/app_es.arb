@@ -16,5 +16,15 @@
   "confirmPassword": "Confirmar Contraseña",
   "invalidEmail": "Correo electrónico no válido",
   "invalidUrl": "URL de foto de perfil no válida",
-  "passwordMismatch": "Las contraseñas no coinciden"
+  "passwordMismatch": "Las contraseñas no coinciden",
+  "metricsSummary": "Resumen de métricas",
+  "completed": "Terminadas",
+  "inProgress": "En progreso",
+  "noUpcomingTasks": "No tienes tareas próximas",
+  "taskDueSoon": "Tu tarea más cercana a vencer",
+  "group": "Grupo",
+  "tasks": "Tareas",
+  "performance": "Desempeño",
+  "requests": "Solicitudes",
+  "signOut": "Cerrar Sesión"
 }

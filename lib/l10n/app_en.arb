@@ -16,5 +16,15 @@
     "confirmPassword": "Confirm Password",
     "invalidEmail": "Invalid email address",
     "invalidUrl": "Invalid profile picture URL",
-    "passwordMismatch": "Passwords do not match"
+    "passwordMismatch": "Passwords do not match",
+    "metricsSummary": "Metrics Summary",
+    "completed": "Completed",
+    "inProgress": "In Progress",
+    "noUpcomingTasks": "You have no upcoming tasks",
+    "taskDueSoon": "Your task due soon",
+    "group": "Group",
+    "tasks": "Tasks",
+    "performance": "Performance",
+    "requests": "Requests",
+    "signOut": "Sign Out"
 }

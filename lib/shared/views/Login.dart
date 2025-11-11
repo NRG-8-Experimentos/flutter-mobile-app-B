@@ -113,8 +113,6 @@ class _LoginState extends State<Login> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
-                  LanguageSwitcherButton(),
-                  const SizedBox(height: 20),
                   TextField(
                     controller: _usernameController,
                     decoration: InputDecoration(
