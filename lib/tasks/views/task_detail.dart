@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../requests/bloc/request_bloc.dart';
 import '../../requests/views/create_request_screen.dart';
 import '../bloc/task/task_bloc.dart';
@@ -22,6 +23,7 @@ class TaskDetail extends StatefulWidget {
 class _TaskDetailState extends State<TaskDetail> {
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return BlocProvider(
       create: (context) => TaskBloc(taskService: TaskService())
         ..add(LoadTaskByIdEvent(widget.taskId)),
@@ -29,8 +31,8 @@ class _TaskDetailState extends State<TaskDetail> {
         backgroundColor: Colors.white,
         appBar: AppBar(
           backgroundColor: Colors.white,
-          title: const Text(
-            'Detalles de la tarea',
+          title: Text(
+              localizations.taskDetailTitle,
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
         ),
@@ -43,7 +45,7 @@ class _TaskDetailState extends State<TaskDetail> {
             } else if (state is TaskError) {
               return Center(child: Text(state.message));
             }
-            return const Center(child: Text('No se encontró la tarea'));
+            return Center(child: Text(localizations.taskNotFound));
           },
         ),
       ),
@@ -51,7 +53,7 @@ class _TaskDetailState extends State<TaskDetail> {
   }
 
   Widget _buildTaskCard(BuildContext context, Task task) {
-
+    final localizations = AppLocalizations.of(context)!;
     final progressColor = _getDividerColor(task.createdAt, task.dueDate, task.status);
     final formattedDates = _formatTaskDates(task);
 
@@ -141,7 +143,7 @@ class _TaskDetailState extends State<TaskDetail> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: Text("Enviar un comentario", style: TextStyle(fontSize: 18, color: Colors.white)),
+                        child: Text(localizations.sendComment, style: TextStyle(fontSize: 18, color: Colors.white)),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -151,16 +153,16 @@ class _TaskDetailState extends State<TaskDetail> {
                           final confirmation = await showDialog<bool>(
                             context: context,
                             builder: (context) => AlertDialog(
-                              title: Text('Completado'),
-                              content: Text('¿Deseas marcar esta tarea como completada? Se creará una solicitud.'),
+                              title: Text(localizations.completed),
+                              content: Text(localizations.confirmMarkCompleted),
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.of(context).pop(false),
-                                  child: const Text('Cancelar'),
+                                  child: Text(localizations.cancel),
                                 ),
                                 TextButton(
                                   onPressed: () => Navigator.of(context).pop(true),
-                                  child: const Text('Confirmar', style: TextStyle(color: Colors.green)),
+                                  child: Text(localizations.confirm, style: TextStyle(color: Colors.green)),
                                 ),
                               ],
                             ),
@@ -170,7 +172,7 @@ class _TaskDetailState extends State<TaskDetail> {
                               await context.read<RequestBloc>()
                                   .requestService.createRequest(
                                   task.id,
-                                  'Se ha completado la tarea.',
+                                  localizations.requestCompletionMessage,
                                   'SUBMISSION'
                               );
                               context.read<TaskBloc>().add(
@@ -182,12 +184,12 @@ class _TaskDetailState extends State<TaskDetail> {
 
                               if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Request created successfully')),
+                                SnackBar(content: Text(localizations.requestCreatedSuccess)),
                               );
                             } catch (e) {
                               if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Failed to create request')),
+                                SnackBar(content: Text(localizations.requestCreatedFailure)),
                               );
                             }
                           }
@@ -198,7 +200,7 @@ class _TaskDetailState extends State<TaskDetail> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: Text("Marcar como completada", style: TextStyle(fontSize: 18, color: Colors.white)),
+                        child: Text(localizations.markAsCompleted, style: TextStyle(fontSize: 18, color: Colors.white)),
                       ),
                     ),
                   ],

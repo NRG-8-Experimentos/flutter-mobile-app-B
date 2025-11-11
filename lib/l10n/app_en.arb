@@ -52,5 +52,8 @@
     "cancel": "Cancel",
     "confirm": "Confirm",
     "requestCreatedSuccess": "Request created successfully",
-    "requestCreatedFailure": "Failed to create request"
+    "requestCreatedFailure": "Failed to create request",
+    "taskDetailTitle": "Task Details",
+    "taskNotFound": "Task not found",
+    "requestCompletionMessage": "The task has been completed."
 }

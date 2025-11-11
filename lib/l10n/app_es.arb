@@ -51,5 +51,8 @@
   "cancel": "Cancelar",
   "confirm": "Confirmar",
   "requestCreatedSuccess": "Solicitud creada correctamente",
-  "requestCreatedFailure": "Error al crear la solicitud"
+  "requestCreatedFailure": "Error al crear la solicitud",
+  "taskDetailTitle": "Detalles de la tarea",
+  "taskNotFound": "No se encontró la tarea",
+  "requestCompletionMessage": "Se ha completado la tarea."
 }
