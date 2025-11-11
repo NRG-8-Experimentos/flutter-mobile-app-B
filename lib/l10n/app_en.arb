@@ -96,5 +96,13 @@
     "groupMembersLabel": "Members",
     "groupDescriptionLabel": "Description",
     "pendingInvitationSnack": "You have a pending invitation.",
-    "invitationRejected": "Your invitation was rejected."
+    "invitationRejected": "Your invitation was rejected.",
+    "loading": "Loading",
+    "error": "Error",
+    "teamMembersTitle": "Your teammates:",
+    "leaveGroupDialogTitle": "Leave group?",
+    "leaveGroupDialogContent": "Are you sure you want to leave this group? This action cannot be undone.",
+    "leaveGroupAction": "Leave",
+    "leaveGroupButton": "Leave Group",
+    "groupLeftSuccess": "You have left the group successfully."
 }

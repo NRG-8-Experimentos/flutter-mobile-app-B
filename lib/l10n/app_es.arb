@@ -95,5 +95,13 @@
   "groupMembersLabel": "Miembros",
   "groupDescriptionLabel": "Descripción",
   "pendingInvitationSnack": "Tienes una invitación pendiente.",
-  "invitationRejected": "Tu invitación fue rechazada."
+  "invitationRejected": "Tu invitación fue rechazada.",
+  "loading": "Cargando",
+  "error": "Error",
+  "teamMembersTitle": "Tus compañeros de equipo:",
+  "leaveGroupDialogTitle": "¿Abandonar grupo?",
+  "leaveGroupDialogContent": "¿Estás seguro de que deseas abandonar este grupo? Esta acción no se puede deshacer.",
+  "leaveGroupAction": "Abandonar",
+  "leaveGroupButton": "Abandonar Grupo",
+  "groupLeftSuccess": "Has abandonado el grupo exitosamente."
 }
