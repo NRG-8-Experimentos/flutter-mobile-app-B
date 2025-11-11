@@ -65,5 +65,16 @@
     "totalReschedules": "Total reschedules",
     "rescheduled": "Rescheduled",
     "avgCompletionTimeTitle": "Average completion time",
-    "noAssignedTasks": "No tasks assigned."
+    "noAssignedTasks": "No tasks assigned.",
+    "requestsScreenTitle": "My Requests",
+    "noSentRequests": "No requests sent",
+    "section_pendingRequests": "Pending requests",
+    "section_solvedRequests": "Solved requests",
+    "noAvailableRequests": "No requests available",
+    "requestAlreadyValidatedTitle": "Request already validated",
+    "requestAlreadyValidatedContent": "Do you want to clear this request?",
+    "clear": "Clear",
+    "requestClearedSuccess": "Request cleared successfully",
+    "requestClearedFailure": "Failed to clear request",
+    "comment": "Comment"
 }

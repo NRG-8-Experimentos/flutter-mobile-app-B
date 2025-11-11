@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../bloc/request_bloc.dart';
 import '../bloc/request_event.dart';
 import '../bloc/request_state.dart';
@@ -45,11 +46,12 @@ class _RequestsScreenState extends State<RequestsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text('Mis solicitudes',
+        title: Text(localizations.requestsScreenTitle,
             style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold
@@ -63,14 +65,14 @@ class _RequestsScreenState extends State<RequestsScreen> {
               child: CircularProgressIndicator(),
             );
           } else if (state is MemberRequestsLoaded) {
-            return _buildRequestsContent(state.requests);
+            return _buildRequestsContent(state.requests, context);
           } else if (state is RequestError) {
             return Center(
               child: Text(state.message)
             );
           }
           return Center(
-            child: Text('No hay solicitudes enviadas',
+            child: Text(localizations.noSentRequests,
               style: TextStyle(fontSize: 18, color: Colors.grey)
             )
           );
@@ -79,7 +81,8 @@ class _RequestsScreenState extends State<RequestsScreen> {
     );
   }
 
-  Widget _buildRequestsContent(List<Request> requests) {
+  Widget _buildRequestsContent(List<Request> requests, BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     final pendingRequests = requests.where((r) => r.requestStatus == 'PENDING').toList();
     final solvedRequests = requests.where((r) => r.requestStatus != 'PENDING').toList();
 
@@ -109,7 +112,7 @@ class _RequestsScreenState extends State<RequestsScreen> {
               ),
               child: Center(
                 child: Text(
-                  'No hay solicitudes disponibles',
+                  localizations.noAvailableRequests,
                   style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
@@ -117,7 +120,7 @@ class _RequestsScreenState extends State<RequestsScreen> {
           else
             Column(
               children:
-                requests.map((r) => _buildRequestCard(r, isSolved)).toList(),
+                requests.map((r) => _buildRequestCard(r, isSolved, context)).toList(),
             )
         ],
       );
@@ -129,32 +132,32 @@ class _RequestsScreenState extends State<RequestsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            buildSection('Solicitudes pendientes', pendingRequests, false),
-            buildSection('Solicitudes resueltas', solvedRequests, true),
+            buildSection(localizations.section_pendingRequests, pendingRequests, false),
+            buildSection(localizations.section_solvedRequests, solvedRequests, true),
           ],
         ),
       )
     );
   }
 
-  Widget _buildRequestCard(Request request, bool isSolved) {
-
+  Widget _buildRequestCard(Request request, bool isSolved, BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return InkWell(
       onTap: () async {
         if (isSolved) {
           final confirmation = await showDialog<bool>(
             context: context,
             builder: (context) => AlertDialog(
-                title: const Text('Tu solicitud ya fue validada'),
-                content: const Text('¿Deseas limpiar esta solicitud?'),
+                title: Text(localizations.requestAlreadyValidatedTitle),
+                content: Text(localizations.requestAlreadyValidatedContent),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('Cancelar'),
+                    child: Text(localizations.cancel),
                   ),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text('Limpiar'),
+                    child: Text(localizations.clear),
                   ),
                 ],
               )
@@ -206,7 +209,7 @@ class _RequestsScreenState extends State<RequestsScreen> {
                               ),
                               const Divider(thickness: 2),
                               const SizedBox(height: 8),
-                              Text('Comentario: ${request.description}', style: const TextStyle(color: Colors.black)),
+                              Text('${localizations.comment}: ${request.description}', style: const TextStyle(color: Colors.black)),
                             ],
                           ),
                         ),

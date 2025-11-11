@@ -64,5 +64,16 @@
   "totalReschedules": "Cantidad total de reprogramaciones",
   "rescheduled": "Reprogramadas",
   "avgCompletionTimeTitle": "Tiempo Promedio de Finalización",
-  "noAssignedTasks": "No hay tareas asignadas."
+  "noAssignedTasks": "No hay tareas asignadas.",
+  "requestsScreenTitle": "Mis solicitudes",
+  "noSentRequests": "No hay solicitudes enviadas",
+  "section_pendingRequests": "Solicitudes pendientes",
+  "section_solvedRequests": "Solicitudes resueltas",
+  "noAvailableRequests": "No hay solicitudes disponibles",
+  "requestAlreadyValidatedTitle": "Tu solicitud ya fue validada",
+  "requestAlreadyValidatedContent": "¿Deseas limpiar esta solicitud?",
+  "clear": "Limpiar",
+  "requestClearedSuccess": "Solicitud limpiada correctamente",
+  "requestClearedFailure": "Error al limpiar la solicitud",
+  "comment": "Comentario"
 }
