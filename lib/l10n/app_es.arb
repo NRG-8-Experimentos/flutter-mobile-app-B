@@ -54,5 +54,15 @@
   "requestCreatedFailure": "Error al crear la solicitud",
   "taskDetailTitle": "Detalles de la tarea",
   "taskNotFound": "No se encontró la tarea",
-  "requestCompletionMessage": "Se ha completado la tarea."
+  "requestCompletionMessage": "Se ha completado la tarea.",
+  "statisticsTitle": "Resumen de mi desempeño",
+  "statMarkedCompleted": "Marcadas como Completadas",
+  "statDone": "Terminadas",
+  "statPending": "Pendientes",
+  "statOverdue": "Atrasadas",
+  "tasksDistribution": "Distribución de Tareas",
+  "totalReschedules": "Cantidad total de reprogramaciones",
+  "rescheduled": "Reprogramadas",
+  "avgCompletionTimeTitle": "Tiempo Promedio de Finalización",
+  "noAssignedTasks": "No hay tareas asignadas."
 }

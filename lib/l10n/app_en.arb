@@ -55,5 +55,15 @@
     "requestCreatedFailure": "Failed to create request",
     "taskDetailTitle": "Task Details",
     "taskNotFound": "Task not found",
-    "requestCompletionMessage": "The task has been completed."
+    "requestCompletionMessage": "The task has been completed.",
+    "statisticsTitle": "My performance summary",
+    "statMarkedCompleted": "Marked as completed",
+    "statDone": "Done",
+    "statPending": "Pending",
+    "statOverdue": "Overdue",
+    "tasksDistribution": "Tasks distribution",
+    "totalReschedules": "Total reschedules",
+    "rescheduled": "Rescheduled",
+    "avgCompletionTimeTitle": "Average completion time",
+    "noAssignedTasks": "No tasks assigned."
 }

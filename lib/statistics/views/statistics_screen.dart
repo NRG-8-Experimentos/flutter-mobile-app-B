@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../l10n/app_localizations.dart';
 import '../bloc/statistics_bloc.dart';
 import '../bloc/statistics_event.dart';
 import '../bloc/statistics_state.dart';
@@ -58,13 +59,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return BlocProvider(
       create: (_) => StatisticsBloc(StatisticsService())..add(LoadMemberStatistics(widget.memberId)),
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
           backgroundColor: Colors.white,
-          title: const Text('Resumen de mi desempeño', style: TextStyle(color: kBluePrimary)),
+          title: Text(localizations.statisticsTitle, style: TextStyle(color: kBluePrimary)),
           iconTheme: const IconThemeData(color: kBluePrimary),
           elevation: 0,
         ),
@@ -134,27 +136,27 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             _StatCard(
-                              label: 'Marcadas como Completadas',
+                              label: localizations.statMarkedCompleted,
                               value: stats.overview.completed.toString(),
                               color: Colors.green,
                             ),
                             _StatCard(
-                              label: 'Terminadas',
+                              label: localizations.completed,
                               value: (stats.overview.done ?? 0).toString(),
                               color: Colors.teal,
                             ),
                             _StatCard(
-                              label: 'En progreso',
+                              label: localizations.inProgress,
                               value: stats.overview.inProgress.toString(),
                               color: Colors.blue,
                             ),
                             _StatCard(
-                              label: 'Pendientes',
+                              label: localizations.statPending,
                               value: stats.overview.pending.toString(),
                               color: Colors.orange,
                             ),
                             _StatCard(
-                              label: 'Atrasadas',
+                              label: localizations.statOverdue,
                               value: stats.overview.overdue.toString(),
                               color: Colors.red,
                             ),
@@ -165,7 +167,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       // Distribución de tareas debajo de las cajas de estado
                       _SectionCard(
                         icon: Icons.list_alt,
-                        title: 'Distribución de Tareas',
+                        title: localizations.tasksDistribution,
                         child: ConstrainedBox(
                           constraints: const BoxConstraints(
                             maxHeight: 200,
@@ -176,9 +178,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                   child: Center(child: CircularProgressIndicator()),
                                 )
                               : _memberTasks.isEmpty
-                                  ? const Padding(
+                                  ? Padding(
                                       padding: EdgeInsets.symmetric(vertical: 8.0),
-                                      child: Text('No hay tareas asignadas.', style: TextStyle(color: Colors.black54)),
+                                      child: Text(localizations.noAssignedTasks, style: TextStyle(color: Colors.black54)),
                                     )
                                   : Scrollbar(
                                       thumbVisibility: true,
@@ -221,12 +223,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       // Otras secciones
                       _SectionCard(
                         icon: Icons.build,
-                        title: 'Cantidad total de reprogramaciones',
+                        title: localizations.totalReschedules,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _MetricRow(
-                              label: 'Reprogramadas',
+                              label: localizations.rescheduled,
                               value: stats.rescheduledTasks.rescheduled.toString(),
                             )
                           ],
@@ -235,7 +237,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       const SizedBox(height: 18),
                       _SectionCard(
                         icon: Icons.date_range,
-                        title: 'Tiempo Promedio de Finalización',
+                        title: localizations.avgCompletionTimeTitle,
                         child: Row(
                           children: [
                             Icon(Icons.timer, color: kBlueAccent),
