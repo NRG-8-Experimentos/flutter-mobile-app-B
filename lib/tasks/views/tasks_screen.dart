@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:synhub_flutter/requests/views/create_request_screen.dart';
 import 'package:synhub_flutter/tasks/views/task_detail.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../requests/bloc/request_bloc.dart';
 import '../bloc/task/task_bloc.dart';
 import '../bloc/task/task_event.dart';
@@ -28,11 +29,12 @@ class _TasksScreenState extends State<TasksScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: Text('Mis Tareas', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        title: Text(localizations.myTasks, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 20.0),
@@ -57,17 +59,17 @@ class _TasksScreenState extends State<TasksScreen> {
                   showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
-                      title: const Text('Ayuda', style: TextStyle(color: Color(0xFF1A4E85), fontWeight: FontWeight.bold)),
+                      title: Text(localizations.help, style: TextStyle(color: Color(0xFF1A4E85), fontWeight: FontWeight.bold)),
                       content:
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Aquí puedes ver todas tus tareas asignadas. Toca una tarea para ver los detalles, enviar comentarios o marcarla como completada.', textAlign: TextAlign.justify),
+                          Text(localizations.helpDialog1, textAlign: TextAlign.justify),
                           SizedBox(height: 8),
-                          Text('Dentro de cada tarea, podrás ver una barra de color que indica el tiempo restante para completarla.', textAlign: TextAlign.justify),
+                          Text(localizations.helpDialog2, textAlign: TextAlign.justify),
                           SizedBox(height: 8),
-                          Text('Los colores de la barra indican lo siguiente:', style: TextStyle(fontWeight: FontWeight.bold)),
+                          Text(localizations.helpDialog3, style: TextStyle(fontWeight: FontWeight.bold)),
                           SizedBox(height: 8),
                           Container(
                             height: 4,
@@ -77,7 +79,7 @@ class _TasksScreenState extends State<TasksScreen> {
                             ),
                           ),
                           SizedBox(height: 8),
-                          Text('Verde: Tarea en progreso con un tiempo de progreso menor al 70%.', textAlign: TextAlign.justify),
+                          Text(localizations.helpDialog4, textAlign: TextAlign.justify),
                           SizedBox(height: 8),
                           Container(
                             height: 4,
@@ -87,7 +89,7 @@ class _TasksScreenState extends State<TasksScreen> {
                             ),
                           ),
                           SizedBox(height: 8),
-                          Text('Amarillo: Tarea en progreso con un tiempo de progreso mayor o igual al 70%.', textAlign: TextAlign.justify),
+                          Text(localizations.helpDialog5, textAlign: TextAlign.justify),
                           SizedBox(height: 8),
                           Container(
                             height: 4,
@@ -97,7 +99,7 @@ class _TasksScreenState extends State<TasksScreen> {
                             ),
                           ),
                           SizedBox(height: 8),
-                          Text('Rojo: Tarea vencida', textAlign: TextAlign.justify),
+                          Text(localizations.helpDialog6, textAlign: TextAlign.justify),
                           SizedBox(height: 8),
                           Container(
                             height: 4,
@@ -107,7 +109,7 @@ class _TasksScreenState extends State<TasksScreen> {
                             ),
                           ),
                           SizedBox(height: 8),
-                          Text('Naranja: Tarea pendiente de una solicitud o comentario', textAlign: TextAlign.justify),
+                          Text(localizations.helpDialog7, textAlign: TextAlign.justify),
                           SizedBox(height: 8),
                           Container(
                             height: 4,
@@ -117,13 +119,13 @@ class _TasksScreenState extends State<TasksScreen> {
                             ),
                           ),
                           SizedBox(height: 8),
-                          Text('Azul: Tarea terminada o completada (ya validada)', textAlign: TextAlign.justify),
+                          Text(localizations.helpDialog8, textAlign: TextAlign.justify),
                         ],
                       ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(),
-                          child: const Text('Cerrar', style: TextStyle(color: Color(0xFF1A4E85))),
+                          child: Text(localizations.close, style: const TextStyle(color: Color(0xFF1A4E85))),
                         ),
                       ],
                     ),
@@ -139,17 +141,18 @@ class _TasksScreenState extends State<TasksScreen> {
           if (state is TaskLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is MemberTasksLoaded) {
-            return _buildTaskContent(state.tasks);
+            return _buildTaskContent(state.tasks, context);
           } else if (state is TaskError) {
             return Center(child: Text(state.message));
           }
-          return const Center(child: Text('No hay datos'));
+          return Center(child: Text(localizations.noData));
         },
       ),
     );
   }
 
-  Widget _buildTaskContent(List<Task> tasks) {
+  Widget _buildTaskContent(List<Task> tasks, BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     final inProgressTasks = tasks.where((t) => t.status == "IN_PROGRESS").toList();
     final completedTasks = tasks.where((t) => t.status == "COMPLETED").toList();
     final expiredTasks = tasks.where((t) => t.status == "EXPIRED").toList();
@@ -175,13 +178,13 @@ class _TasksScreenState extends State<TasksScreen> {
             ),
             child: Center(
               child: Text(
-                'No hay tareas en esta sección',
+                localizations.noTasksInSection,
                 style: TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
           )
               : Column(
-            children: sectionTasks.map((task) => _buildTaskCard(task)).toList(),
+            children: sectionTasks.map((task) => _buildTaskCard(task, context)).toList(),
           ),
         ],
       );
@@ -193,18 +196,19 @@ class _TasksScreenState extends State<TasksScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            buildSection('Tareas en progreso', inProgressTasks),
-            buildSection('Tareas vencidas', expiredTasks),
-            buildSection('Tareas en espera de validación', onHoldTasks),
-            buildSection('Tareas marcadas como hechas', completedTasks),
-            buildSection('Tareas completadas', doneTasks),
+            buildSection(localizations.section_in_progress, inProgressTasks),
+            buildSection(localizations.section_expired, expiredTasks),
+            buildSection(localizations.section_on_hold, onHoldTasks),
+            buildSection(localizations.section_marked_done, completedTasks),
+            buildSection(localizations.section_completed, doneTasks),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTaskCard(Task task) {
+  Widget _buildTaskCard(Task task, BuildContext contextT) {
+    final localizations = AppLocalizations.of(contextT)!;
     final progressColor = _getDividerColor(task.createdAt, task.dueDate, task.status);
     final formattedDates = _formatTaskDates(task);
 
@@ -298,7 +302,7 @@ class _TasksScreenState extends State<TasksScreen> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: Text("Enviar un comentario", style: TextStyle(fontSize: 18, color: Colors.white)),
+                    child: Text(localizations.sendComment, style: TextStyle(fontSize: 18, color: Colors.white)),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -308,16 +312,16 @@ class _TasksScreenState extends State<TasksScreen> {
                       final confirmation = await showDialog<bool>(
                         context: context,
                         builder: (context) => AlertDialog(
-                          title: Text('Completado'),
-                          content: Text('¿Deseas marcar esta tarea como completada? Se creará una solicitud.'),
+                          title: Text(localizations.completedDialogTitle),
+                          content: Text(localizations.confirmMarkCompleted),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(false),
-                              child: const Text('Cancelar'),
+                              child: Text(localizations.cancel),
                             ),
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(true),
-                              child: const Text('Confirmar', style: TextStyle(color: Colors.green)),
+                              child: Text(localizations.confirm, style: TextStyle(color: Colors.green)),
                             ),
                           ],
                         ),
@@ -340,12 +344,12 @@ class _TasksScreenState extends State<TasksScreen> {
 
                           if (!mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Request created successfully')),
+                            SnackBar(content: Text(localizations.requestCreatedSuccess)),
                           );
                         } catch (e) {
                           if (!mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Failed to create request')),
+                            SnackBar(content: Text(localizations.requestCreatedFailure)),
                           );
                         }
                       }
@@ -356,7 +360,7 @@ class _TasksScreenState extends State<TasksScreen> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: Text("Marcar como completada", style: TextStyle(fontSize: 18, color: Colors.white)),
+                    child: Text(localizations.markAsCompleted, style: TextStyle(fontSize: 18, color: Colors.white)),
                   ),
                 ),
               ],
