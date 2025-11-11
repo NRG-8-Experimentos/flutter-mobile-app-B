@@ -278,15 +278,15 @@ class _SearchGroupContentState extends State<_SearchGroupContent> {
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Center(
-                                  child:
-                                  Text('Cerrar Sesión',
-                                    style:
-                                      TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16
-                                      ),
-                                    textAlign: TextAlign.center,
+                                child:
+                                Text('Cerrar Sesión',
+                                  style:
+                                  TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16
                                   ),
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
                             ),
                           )

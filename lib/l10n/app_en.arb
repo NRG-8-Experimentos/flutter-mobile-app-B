@@ -1,0 +1,11 @@
+{
+    "@@locale": "en",
+    "appName": "SynHub",
+    "insertUsername": "Insert Username",
+    "insertPassword": "Insert Password",
+    "username": "Username",
+    "password": "Password",
+    "loginError": "Login failed. Please try again.",
+    "registerButtonText": "Register",
+    "loginButtonText": "Login"
+}

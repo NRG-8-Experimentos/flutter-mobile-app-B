@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../group/views/SearchGroup.dart';
+import '../../l10n/app_localizations.dart';
 import '../bloc/auth/auth_bloc.dart';
 import '../bloc/auth/auth_event.dart';
 import '../bloc/auth/auth_state.dart';
 import '../bloc/member/member_bloc.dart';
+import '../components/language_switcher_button.dart';
 import '../services/auth_service.dart';
 import '../services/member_service.dart';
 import 'Register.dart';
@@ -61,6 +63,8 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+
     return BlocProvider(
       create: (context) => AuthBloc(
         authService: AuthService(),
@@ -99,9 +103,9 @@ class _LoginState extends State<Login> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Text(
-                    'Login',
-                    style: TextStyle(
+                  Text(
+                    localizations.loginButtonText,
+                    style: const TextStyle(
                       fontSize: 20,
                       color: Color(0xFF000000),
                       fontWeight: FontWeight.bold,
@@ -109,28 +113,30 @@ class _LoginState extends State<Login> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
+                  LanguageSwitcherButton(),
+                  const SizedBox(height: 20),
                   TextField(
                     controller: _usernameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Insert Username',
-                      hintText: 'Username',
-                      prefixIcon: Icon(Icons.person, color: Colors.grey),
+                    decoration: InputDecoration(
+                      labelText: localizations.insertUsername,
+                      hintText: localizations.username,
+                      prefixIcon: const Icon(Icons.person, color: Colors.grey),
                       filled: true,
-                      fillColor: Color(0xFFF3F3F3),
-                      border: OutlineInputBorder(),
+                      fillColor: const Color(0xFFF3F3F3),
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 20),
                   TextField(
                     controller: _passwordController,
                     obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Insert Password',
-                      hintText: 'password',
-                      prefixIcon: Icon(Icons.lock, color: Colors.grey),
+                    decoration: InputDecoration(
+                      labelText: localizations.insertPassword,
+                      hintText: localizations.password,
+                      prefixIcon: const Icon(Icons.lock, color: Colors.grey),
                       filled: true,
-                      fillColor: Color(0xFFF3F3F3),
-                      border: OutlineInputBorder(),
+                      fillColor: const Color(0xFFF3F3F3),
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                   if (state is AuthFailure)
@@ -166,8 +172,8 @@ class _LoginState extends State<Login> {
                       ),
                       child: state is AuthLoading
                           ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text(
-                        'Iniciar Sesion',
+                          : Text(
+                        localizations.loginButtonText,
                         style: TextStyle(
                           fontSize: 20,
                           color: Colors.white,
@@ -201,8 +207,8 @@ class _LoginState extends State<Login> {
                             ),
                           ),
                         ),
-                        child: const Text(
-                          'Registrase',
+                        child: Text(
+                          localizations.registerButtonText,
                           style: TextStyle(
                             fontSize: 20,
                             color: Colors.black,

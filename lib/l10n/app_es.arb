@@ -1,0 +1,11 @@
+{
+  "@@locale": "es",
+  "appName": "SynHub"
+  "insertUsername": "Inserte Nombre de Usuario",
+  "insertPassword": "Inserte Contraseña",
+  "username": "Nombre de Usuario",
+  "password": "Contraseña",
+  "loginError": "Error al iniciar sesión. Por favor, inténtelo de nuevo.",
+  "registerButtonText": "Registrarse",
+  "loginButtonText": "Iniciar Sesión"
+}
