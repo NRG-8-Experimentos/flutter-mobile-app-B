@@ -23,20 +23,26 @@ class LanguageSwitcherButton extends StatelessWidget {
 
     return Column(
       children: [
-        ElevatedButton(
-          onPressed: () {
-            // Envía el evento al Bloc con el nuevo Locale
-            context.read<LocaleBloc>().add(
-              LocaleChanged(Locale(newLanguageCode)),
-            );
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.indigo,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          ),
-          child: Text(
-            buttonLabel,
-            style: const TextStyle(color: Colors.white),
+        SizedBox(
+          width: double.infinity, // ocupa todo el ancho disponible
+          child: ElevatedButton(
+            onPressed: () {
+              context.read<LocaleBloc>().add(
+                LocaleChanged(Locale(newLanguageCode)),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+              ),
+            ),
+            child: Text(
+              buttonLabel,
+              style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
+            ),
           ),
         ),
       ],
