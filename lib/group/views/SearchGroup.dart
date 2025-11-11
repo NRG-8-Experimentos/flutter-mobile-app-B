@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../shared/bloc/member/member_bloc.dart';
 import '../../shared/client/api_client.dart';
 import '../../shared/services/member_service.dart';
@@ -43,6 +44,7 @@ class _SearchGroupState extends State<SearchGroup> {
   }
 
   void _showGroupDialog(BuildContext context, Group group) {
+    final localizations = AppLocalizations.of(context)!;
     final invitationBloc = BlocProvider.of<InvitationBloc>(context);
     showDialog(
       context: context,
@@ -56,7 +58,7 @@ class _SearchGroupState extends State<SearchGroup> {
               context.read<InvitationBloc>().add(LoadMemberInvitationEvent());
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Solicitud enviada al grupo ${group.name}'),
+                  content: Text('${localizations.sendGroupRequestSent} ${group.name}'),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -70,7 +72,7 @@ class _SearchGroupState extends State<SearchGroup> {
             }
           },
           child: AlertDialog(
-            title: const Text('Grupo Encontrado'),
+            title: Text(localizations.groupFoundTitle),
             content: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -84,20 +86,20 @@ class _SearchGroupState extends State<SearchGroup> {
                       ),
                     ),
                   const SizedBox(height: 16),
-                  Text('Nombre: ${group.name}'),
+                  Text('${localizations.name}: ${group.name}'),
                   const SizedBox(height: 8),
-                  Text('Miembros: ${group.memberCount}'),
+                  Text('${localizations.groupMembersLabel}: ${group.memberCount}'),
                   const SizedBox(height: 8),
-                  Text('Descripción: ${group.description}'),
+                  Text('${localizations.groupDescriptionLabel}: ${group.description}'),
                   const SizedBox(height: 8),
-                  Text('Código: ${group.code}'),
+                  Text('${localizations.groupCodeLabel}: ${group.code}'),
                 ],
               ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Cancelar', style: TextStyle(color: Colors.red)),
+                child: Text(localizations.cancel, style: TextStyle(color: Colors.red)),
               ),
               BlocBuilder<InvitationBloc, InvitationState>(
                 builder: (context, state) {
@@ -121,8 +123,8 @@ class _SearchGroupState extends State<SearchGroup> {
                         strokeWidth: 2,
                       ),
                     )
-                        : const Text(
-                      'Enviar solicitud',
+                        : Text(
+                      localizations.sendGroupRequest,
                       style: TextStyle(color: Colors.white),
                     ),
                   );
@@ -159,6 +161,7 @@ class _SearchGroupContentState extends State<_SearchGroupContent> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: const Color(0xFFFFFFFF),
       body: PopScope(
@@ -187,18 +190,18 @@ class _SearchGroupContentState extends State<_SearchGroupContent> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text('Tienes una invitación pendiente', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                              Text(localizations.pendingInvitationCardTitle, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                               SizedBox(height: 10),
-                              Text('Grupo: ${invitation.group.name}', style: TextStyle(fontSize: 18)),
+                              Text('${localizations.group}: ${invitation.group.name}', style: TextStyle(fontSize: 18)),
                               SizedBox(height: 10),
-                              Text('Código: #${invitation.group.code}', style: TextStyle(fontSize: 16, color: Colors.grey[800])),
+                              Text('${localizations.groupCodeLabel}: #${invitation.group.code}', style: TextStyle(fontSize: 16, color: Colors.grey[800])),
                               SizedBox(height: 20),
                               ElevatedButton(
                                 onPressed: () {
                                   context.read<InvitationBloc>().add(CancelMemberInvitationEvent());
                                 },
                                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                                child: const Text('Cancelar solicitud', style: TextStyle(color: Colors.white)),
+                                child: Text(localizations.cancelGroupRequest, style: TextStyle(color: Colors.white)),
                               ),
 
                             ],
@@ -232,12 +235,12 @@ class _SearchGroupContentState extends State<_SearchGroupContent> {
                                   if (invitationState is MemberInvitationLoaded && invitationState.invitation != null) {
                                     ScaffoldMessenger.of(context).clearSnackBars();
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Tienes una invitación pendiente.')),
+                                      SnackBar(content: Text(localizations.pendingInvitationCardTitle)),
                                     );
                                   } else {
                                     ScaffoldMessenger.of(context).clearSnackBars();
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Tu invitación fue rechazada.'), backgroundColor: Colors.red),
+                                      SnackBar(content: Text(localizations.invitationRejected), backgroundColor: Colors.red),
                                     );
                                     Navigator.pushReplacement(
                                       context,
@@ -258,7 +261,7 @@ class _SearchGroupContentState extends State<_SearchGroupContent> {
                               padding: const EdgeInsets.all(8.0),
                               child: Center(
                                 child: Text(
-                                  'Sincronizar el estado de la invitación',
+                                  localizations.syncInvitationStatus,
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -279,7 +282,7 @@ class _SearchGroupContentState extends State<_SearchGroupContent> {
                               padding: const EdgeInsets.all(8.0),
                               child: Center(
                                 child:
-                                Text('Cerrar Sesión',
+                                Text(localizations.signOut,
                                   style:
                                   TextStyle(
                                       color: Colors.white,
@@ -304,8 +307,8 @@ class _SearchGroupContentState extends State<_SearchGroupContent> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       const SizedBox(height: 20),
-                      const Text(
-                        'Únete a un grupo',
+                      Text(
+                        localizations.joinGroupTitle,
                         style: TextStyle(
                           fontSize: 40,
                           color: Color(0xFF000000),
@@ -317,8 +320,8 @@ class _SearchGroupContentState extends State<_SearchGroupContent> {
                       TextFormField(
                         controller: widget.codeController,
                         decoration: InputDecoration(
-                          labelText: 'Código del grupo',
-                          hintText: 'Ingresa el código de 6 dígitos',
+                          labelText: localizations.groupCodeLabel,
+                          hintText: localizations.groupCodeHint,
                           prefixIcon: const Icon(Icons.code, color: Colors.grey),
                           filled: true,
                           fillColor: const Color(0xFFF3F3F3),
@@ -326,10 +329,10 @@ class _SearchGroupContentState extends State<_SearchGroupContent> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Por favor ingresa un código';
+                            return localizations.groupCodeRequired;
                           }
                           if (value.length != 9) {
-                            return 'El código debe tener 6 caracteres';
+                            return localizations.groupCodeLengthError;
                           }
                           return null;
                         },
@@ -368,8 +371,8 @@ class _SearchGroupContentState extends State<_SearchGroupContent> {
                             },
                             child: state is GroupLoading
                                 ? const CircularProgressIndicator(color: Colors.white)
-                                : const Text(
-                              'Buscar grupo',
+                                : Text(
+                              localizations.searchGroupButton,
                               style: TextStyle(
                                 fontSize: 20,
                                 color: Colors.white,
@@ -380,10 +383,10 @@ class _SearchGroupContentState extends State<_SearchGroupContent> {
                         },
                       ),
                       if (widget.codeController.text.isEmpty)
-                        const Padding(
+                        Padding(
                           padding: EdgeInsets.only(top: 20),
                           child: Text(
-                            'Pide el código al administrador del grupo',
+                            localizations.askAdminForCode,
                             style: TextStyle(color: Colors.grey),
                           ),
                         ),
@@ -396,7 +399,7 @@ class _SearchGroupContentState extends State<_SearchGroupContent> {
                         style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFFF832A)),
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: const Text('Cerrar Sesión', style: TextStyle(color: Colors.white, fontSize: 20)),
+                          child: Text(localizations.signOut, style: TextStyle(color: Colors.white, fontSize: 20)),
                         ),
                       ),
                     ],
