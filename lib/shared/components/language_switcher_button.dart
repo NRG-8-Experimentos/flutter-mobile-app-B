@@ -24,7 +24,7 @@ class LanguageSwitcherButton extends StatelessWidget {
     return Column(
       children: [
         SizedBox(
-          width: double.infinity, // ocupa todo el ancho disponible
+          width: double.infinity,
           child: ElevatedButton(
             onPressed: () {
               context.read<LocaleBloc>().add(
