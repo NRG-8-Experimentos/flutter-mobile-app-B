@@ -3,7 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../requests/bloc/request_bloc.dart';
-import '../../requests/views/create_request_screen.dart';
+import '../../requests/models/request.dart';
+import '../../requests/services/request_service.dart';
 import '../bloc/task/task_bloc.dart';
 import '../bloc/task/task_event.dart';
 import '../bloc/task/task_state.dart';
@@ -20,6 +21,26 @@ class TaskDetail extends StatefulWidget {
 }
 
 class _TaskDetailState extends State<TaskDetail> {
+  final RequestService _requestService = RequestService();
+  List<Request> _comments = [];
+  bool _loadingComments = false;
+  bool _showCommentForm = false;
+  final TextEditingController _commentController = TextEditingController();
+  bool _savingComment = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Load comments when the screen initializes
+    _loadComments(widget.taskId);
+  }
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -55,157 +76,144 @@ class _TaskDetailState extends State<TaskDetail> {
     final progressColor = _getDividerColor(task.createdAt, task.dueDate, task.status);
     final formattedDates = _formatTaskDates(task);
 
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Card(
-        color: Color(0xFFF5F5F5),
-        elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Text(
-                  task.title,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            Card(
+              color: Color(0xFFF5F5F5),
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              Container(
-                height: 2,
-                decoration: BoxDecoration(
-                    color: Colors.black
-                ),
-              ),
-              const SizedBox(height: 12),
-              ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: 100,
-                  minWidth: double.infinity,
-                ),
-                child: Card(
-                  color: Colors.white,
-                  margin: EdgeInsets.symmetric(vertical: 10),
-                  elevation: 5,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child:
-                  Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Text(
-                      task.description,
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Center(
-                child: Text(
-                  formattedDates,
-                  style: const TextStyle(fontSize: 14),
-                ),
-              ),
-              // Barra de progreso con color según estado
-              const SizedBox(height: 12),
-              Container(
-                height: 8,
-                decoration: BoxDecoration(
-                  color: progressColor,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-              const SizedBox(height: 12),
-              if (task.status == "IN_PROGRESS") ...[
-                Column(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Center(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => CreateRequestScreen(task: task))
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFFFF9800),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                      child: Text(
+                        task.title,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      height: 2,
+                      decoration: BoxDecoration(
+                          color: Colors.black
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: 100,
+                        minWidth: double.infinity,
+                      ),
+                      child: Card(
+                        color: Colors.white,
+                        margin: EdgeInsets.symmetric(vertical: 10),
+                        elevation: 5,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child:
+                        Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Text(
+                            task.description,
+                            style: const TextStyle(fontSize: 16),
                           ),
                         ),
-                        child: Text("Enviar un comentario", style: TextStyle(fontSize: 18, color: Colors.white)),
                       ),
                     ),
                     const SizedBox(height: 12),
                     Center(
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          final confirmation = await showDialog<bool>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text('Completado'),
-                              content: Text('¿Deseas marcar esta tarea como completada? Se creará una solicitud.'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.of(context).pop(false),
-                                  child: const Text('Cancelar'),
-                                ),
-                                TextButton(
-                                  onPressed: () => Navigator.of(context).pop(true),
-                                  child: const Text('Confirmar', style: TextStyle(color: Colors.green)),
-                                ),
-                              ],
-                            ),
-                          );
-                          if (confirmation == true) {
-                            try {
-                              await context.read<RequestBloc>()
-                                  .requestService.createRequest(
-                                  task.id,
-                                  'Se ha completado la tarea.',
-                                  'SUBMISSION'
-                              );
-                              context.read<TaskBloc>().add(
-                                UpdateTaskStatusEvent(
-                                  taskId: task.id,
-                                  status: 'COMPLETED',
-                                ),
-                              );
-
-                              if (!mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Request created successfully')),
-                              );
-                            } catch (e) {
-                              if (!mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Failed to create request')),
-                              );
-                            }
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xff4CAF50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text("Marcar como completada", style: TextStyle(fontSize: 18, color: Colors.white)),
+                      child: Text(
+                        formattedDates,
+                        style: const TextStyle(fontSize: 14),
                       ),
                     ),
+                    // Barra de progreso con color según estado
+                    const SizedBox(height: 12),
+                    Container(
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: progressColor,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    if (task.status == "IN_PROGRESS") ...[
+                      Center(
+                        child: ElevatedButton(
+                              onPressed: () async {
+                                final confirmation = await showDialog<bool>(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: Text('Completado'),
+                                    content: Text('¿Deseas marcar esta tarea como completada? Se creará una solicitud.'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context).pop(false),
+                                        child: const Text('Cancelar'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context).pop(true),
+                                        child: const Text('Confirmar', style: TextStyle(color: Colors.green)),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                if (confirmation == true) {
+                                  try {
+                                    await context.read<RequestBloc>()
+                                        .requestService.createRequest(
+                                        task.id,
+                                        'Se ha completado la tarea.',
+                                        'SUBMISSION'
+                                    );
+                                    context.read<TaskBloc>().add(
+                                      UpdateTaskStatusEvent(
+                                        taskId: task.id,
+                                        status: 'COMPLETED',
+                                      ),
+                                    );
+
+                                    if (!mounted) return;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Request created successfully')),
+                                    );
+                                  } catch (e) {
+                                    if (!mounted) return;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Failed to create request')),
+                                    );
+                                  }
+                                }
+                              },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xff4CAF50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text("Marcar como completada", style: TextStyle(fontSize: 18, color: Colors.white)),
+                        ),
+                      ),
+                    ]
                   ],
-                )
-              ]
-            ],
-          ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            _buildCommentsSection(task),
+          ],
         ),
       ),
     );
@@ -270,21 +278,274 @@ class _TaskDetailState extends State<TaskDetail> {
     }
   }
 
-  String _formatDate(String dateString) {
+
+  Future<void> _loadComments(int taskId) async {
+    setState(() {
+      _loadingComments = true;
+    });
+
     try {
-      final date = DateTime.parse(dateString);
-      return DateFormat('dd/MM/yyyy').format(date);
+      final comments = await _requestService.getRequestsByTaskId(taskId);
+      setState(() {
+        _comments = comments;
+        _loadingComments = false;
+      });
     } catch (e) {
-      return dateString.length > 10 ? dateString.substring(0, 10) : dateString;
+      setState(() {
+        _loadingComments = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No se pudieron cargar los comentarios')),
+        );
+      }
     }
   }
 
-  bool _isTaskOverdue(String dueDate) {
+  void _toggleCommentForm() {
+    setState(() {
+      _showCommentForm = !_showCommentForm;
+      if (!_showCommentForm) {
+        _commentController.clear();
+      }
+    });
+  }
+
+  Future<void> _addComment(int taskId) async {
+    if (_commentController.text.trim().isEmpty) return;
+
+    setState(() {
+      _savingComment = true;
+    });
+
     try {
-      final due = DateTime.parse(dueDate);
-      return DateTime.now().isAfter(due);
+      await _requestService.createRequest(
+        taskId,
+        _commentController.text.trim(),
+        'MODIFICATION',
+      );
+
+      _commentController.clear();
+      setState(() {
+        _savingComment = false;
+        _showCommentForm = false;
+      });
+
+      await _loadComments(taskId);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Comentario agregado exitosamente')),
+        );
+      }
     } catch (e) {
-      return false;
+      setState(() {
+        _savingComment = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No se pudo agregar el comentario')),
+        );
+      }
     }
+  }
+
+  Widget _buildCommentsSection(Task task) {
+    return Card(
+      color: Color(0xFFF5F5F5),
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Comentarios',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: _toggleCommentForm,
+                  icon: Icon(_showCommentForm ? Icons.close : Icons.add_comment),
+                  label: Text(_showCommentForm ? 'Cancelar' : 'Agregar'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _showCommentForm ? Colors.grey : Color(0xFFFF9800),
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            if (_showCommentForm) ...[
+              Card(
+                color: Colors.white,
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: _commentController,
+                        maxLines: 4,
+                        decoration: InputDecoration(
+                          hintText: 'Escribe tu comentario aquí...',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _savingComment ? null : () => _addComment(task.id),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF4CAF50),
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: _savingComment
+                              ? SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(
+                                  'Enviar comentario',
+                                  style: TextStyle(fontSize: 16, color: Colors.white),
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+            if (_loadingComments)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            else if (_comments.isEmpty)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Text(
+                    'No hay comentarios aún',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              )
+            else
+              ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: _comments.length,
+                itemBuilder: (context, index) {
+                  final comment = _comments[index];
+                  return _buildCommentItem(comment);
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCommentItem(Request comment) {
+    Color statusColor;
+    switch (comment.requestStatus) {
+      case 'PENDING':
+        statusColor = Colors.orange;
+        break;
+      case 'APPROVED':
+        statusColor = Colors.green;
+        break;
+      case 'REJECTED':
+        statusColor = Colors.red;
+        break;
+      default:
+        statusColor = Colors.grey;
+    }
+
+    Color typeColor;
+    switch (comment.requestType) {
+      case 'MODIFICATION':
+        typeColor = Colors.blue;
+        break;
+      case 'SUBMISSION':
+        typeColor = Colors.purple;
+        break;
+      default:
+        typeColor = Colors.grey;
+    }
+
+    return Card(
+      color: Colors.white,
+      margin: EdgeInsets.only(bottom: 12),
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: typeColor.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    comment.requestType,
+                    style: TextStyle(
+                      color: typeColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    comment.requestStatus,
+                    style: TextStyle(
+                      color: statusColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              comment.description,
+              style: TextStyle(fontSize: 14),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
