@@ -727,6 +727,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You have left the group successfully.'**
   String get groupLeftSuccess;
+
+  /// No description provided for @appearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
+
+  /// No description provided for @appearance_system.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get appearance_system;
+
+  /// No description provided for @appearance_light.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get appearance_light;
+
+  /// No description provided for @appearance_dark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get appearance_dark;
 }
 
 class _AppLocalizationsDelegate

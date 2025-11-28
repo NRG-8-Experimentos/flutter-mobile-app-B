@@ -103,5 +103,9 @@
   "leaveGroupDialogContent": "¿Estás seguro de que deseas abandonar este grupo? Esta acción no se puede deshacer.",
   "leaveGroupAction": "Abandonar",
   "leaveGroupButton": "Abandonar Grupo",
-  "groupLeftSuccess": "Has abandonado el grupo exitosamente."
+  "groupLeftSuccess": "Has abandonado el grupo exitosamente.",
+  "appearance": "Apariencia",
+  "appearance_system": "Sistema",
+  "appearance_light": "Claro",
+  "appearance_dark": "Oscuro"
 }

@@ -330,4 +330,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get groupLeftSuccess => 'You have left the group successfully.';
+
+  @override
+  String get appearance => 'Appearance';
+
+  @override
+  String get appearance_system => 'System';
+
+  @override
+  String get appearance_light => 'Light';
+
+  @override
+  String get appearance_dark => 'Dark';
 }
