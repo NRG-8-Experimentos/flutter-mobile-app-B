@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-
 import '../../l10n/app_localizations.dart';
 import '../../requests/bloc/request_bloc.dart';
 import '../../requests/models/request.dart';
@@ -14,9 +13,7 @@ import '../services/task_service.dart';
 
 class TaskDetail extends StatefulWidget {
   final int taskId;
-
   const TaskDetail({super.key, required this.taskId});
-
   @override
   State<TaskDetail> createState() => _TaskDetailState();
 }
@@ -45,27 +42,22 @@ class _TaskDetailState extends State<TaskDetail> {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
+
     return BlocProvider(
-      create: (context) => TaskBloc(taskService: TaskService())
-        ..add(LoadTaskByIdEvent(widget.taskId)),
+      create: (context) => TaskBloc(taskService: TaskService())..add(LoadTaskByIdEvent(widget.taskId)),
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: Colors.white,
-          title: Text(
-              localizations.taskDetailTitle,
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
+          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+          title: Text(localizations.taskDetailTitle,
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold,
+                  color: Theme.of(context).appBarTheme.foregroundColor)),
         ),
         body: BlocBuilder<TaskBloc, TaskState>(
           builder: (context, state) {
-            if (state is TaskLoading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is TaskDetailLoaded) {
-              return _buildTaskCard(context, state.task);
-            } else if (state is TaskError) {
-              return Center(child: Text(state.message));
-            }
+            if (state is TaskLoading) return const Center(child: CircularProgressIndicator());
+            if (state is TaskDetailLoaded) return _buildTaskCard(context, state.task);
+            if (state is TaskError) return Center(child: Text(state.message));
             return Center(child: Text(localizations.taskNotFound));
           },
         ),
@@ -78,14 +70,13 @@ class _TaskDetailState extends State<TaskDetail> {
     final progressColor = _getDividerColor(task.createdAt, task.dueDate, task.status);
     final formattedDates = _formatTaskDates(task);
 
-
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
             Card(
-              color: Color(0xFFF5F5F5),
+              color: Theme.of(context).colorScheme.surfaceVariant,
               elevation: 4,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -102,6 +93,7 @@ class _TaskDetailState extends State<TaskDetail> {
                         style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onSurface)
                         ),
                       ),
                     ),
@@ -129,7 +121,7 @@ class _TaskDetailState extends State<TaskDetail> {
                           padding: const EdgeInsets.all(15.0),
                           child: Text(
                             task.description,
-                            style: const TextStyle(fontSize: 16),
+                            style: const TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface))
                           ),
                         ),
                       ),
@@ -158,16 +150,16 @@ class _TaskDetailState extends State<TaskDetail> {
                                 final confirmation = await showDialog<bool>(
                                   context: context,
                                   builder: (context) => AlertDialog(
-                                    title: Text('Completado'),
-                                    content: Text('¿Deseas marcar esta tarea como completada? Se creará una solicitud.'),
+                                    title: Text(localizations.completed),
+                                    content: Text(localizations.confirmMarkCompleted),
                                     actions: [
                                       TextButton(
                                         onPressed: () => Navigator.of(context).pop(false),
-                                        child: const Text('Cancelar'),
+                                        child: Text(localizations.cancel),
                                       ),
                                       TextButton(
                                         onPressed: () => Navigator.of(context).pop(true),
-                                        child: const Text('Confirmar', style: TextStyle(color: Colors.green)),
+                                        child: Text(localizations.confirm, style: TextStyle(color: Colors.green)),
                                       ),
                                     ],
                                   ),
@@ -177,7 +169,7 @@ class _TaskDetailState extends State<TaskDetail> {
                                     await context.read<RequestBloc>()
                                         .requestService.createRequest(
                                         task.id,
-                                        'Se ha completado la tarea.',
+                                        localizations.requestCompletionMessage,
                                         'SUBMISSION'
                                     );
                                     context.read<TaskBloc>().add(
@@ -189,12 +181,12 @@ class _TaskDetailState extends State<TaskDetail> {
 
                                     if (!mounted) return;
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Request created successfully')),
+                                      SnackBar(content: Text(localizations.requestCreatedSuccess)),
                                     );
                                   } catch (e) {
                                     if (!mounted) return;
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Failed to create request')),
+                                      SnackBar(content: Text(localizations.requestCreatedFailure)),
                                     );
                                   }
                                 }
@@ -205,7 +197,7 @@ class _TaskDetailState extends State<TaskDetail> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: Text("Marcar como completada", style: TextStyle(fontSize: 18, color: Colors.white)),
+                          child: Text(localizations.markAsCompleted, style: TextStyle(fontSize: 18, color: Colors.white)),
                         ),
                       ),
                     ]
@@ -222,60 +214,34 @@ class _TaskDetailState extends State<TaskDetail> {
   }
 
   Color _getDividerColor(String createdAt, String dueDate, String status) {
-    if (status == "COMPLETED") return Color(0xFF4CAF50); // Verde para tareas completadas
-    if (status == "ON_HOLD") return Color(0xFFFF832A); // Naranja para tareas en espera
-    if (status == "DONE") return Color(0xFF4A90E2); // Azul para tareas hechas
-    if(status == "EXPIRED") return Color(0xFFF44336); // Rojo para tareas vencidas
+    if (status == "COMPLETED") return const Color(0xFF4CAF50);
+    if (status == "ON_HOLD")  return const Color(0xFFFF832A);
+    if (status == "DONE")     return const Color(0xFF4A90E2);
+    if (status == "EXPIRED")  return const Color(0xFFF44336);
     try {
-      // Parsear fechas considerando la zona horaria
-      final created = _parseDateWithTimeZone(createdAt);
-      final due = _parseDateWithTimeZone(dueDate);
+      final created = DateTime.parse(createdAt).toLocal();
+      final due = DateTime.parse(dueDate).toLocal();
       final now = DateTime.now();
-
       final totalSeconds = due.difference(created).inSeconds.toDouble();
       final secondsPassed = now.difference(created).inSeconds.toDouble();
-
       if (totalSeconds <= 0) return const Color(0xFFF44336);
-
       final progress = (secondsPassed / totalSeconds).clamp(0.0, 1.0);
-
-      if (now.isAfter(due)) {
-        return const Color(0xFFF44336); // Rojo - Tarea vencida
-      } else if (progress < 0.7) {
-        return const Color(0xFF4CAF50); // Verde - Buen progreso
-      } else {
-        return const Color(0xFFFDD634); // Amarillo - Progreso crítico
-      }
-    } catch (e) {
-      return const Color(0xFF4CAF50); // Verde por defecto si hay error
-    }
-  }
-
-  DateTime _parseDateWithTimeZone(String dateString) {
-    try {
-      // Intenta parsear como fecha con zona horaria (ISO 8601)
-      return DateTime.parse(dateString).toLocal();
-    } catch (e) {
-      try {
-        // Intenta parsear como fecha simple
-        return DateFormat("yyyy-MM-dd").parse(dateString);
-      } catch (e) {
-        // Si falla, devuelve la fecha actual como fallback
-        return DateTime.now();
-      }
+      if (now.isAfter(due)) return const Color(0xFFF44336);
+      if (progress < 0.7)   return const Color(0xFF4CAF50);
+      return const Color(0xFFFDD634);
+    } catch (_) {
+      return const Color(0xFF4CAF50);
     }
   }
 
   String _formatTaskDates(Task task) {
     try {
-      final createdAt = _parseDateWithTimeZone(task.createdAt);
-      final dueDate = _parseDateWithTimeZone(task.dueDate);
-
+      final createdAt = DateTime.parse(task.createdAt).toLocal();
+      final dueDate = DateTime.parse(task.dueDate).toLocal();
       final format1 = DateFormat('dd/MM/yyyy');
       final format2 = DateFormat('dd/MM/yyyy HH:mm');
       return '${format1.format(createdAt)} - ${format2.format(dueDate)}';
-    } catch (e) {
-      // Si falla el parsing, usar los primeros 10 caracteres
+    } catch (_) {
       return '${task.createdAt.substring(0, 10)} - ${task.dueDate.substring(0, 10)}';
     }
   }

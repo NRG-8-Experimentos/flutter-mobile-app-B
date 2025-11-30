@@ -331,4 +331,16 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get groupLeftSuccess => 'Has abandonado el grupo exitosamente.';
+
+  @override
+  String get appearance => 'Apariencia';
+
+  @override
+  String get appearance_system => 'Sistema';
+
+  @override
+  String get appearance_light => 'Claro';
+
+  @override
+  String get appearance_dark => 'Oscuro';
 }

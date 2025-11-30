@@ -104,5 +104,9 @@
     "leaveGroupDialogContent": "Are you sure you want to leave this group? This action cannot be undone.",
     "leaveGroupAction": "Leave",
     "leaveGroupButton": "Leave Group",
-    "groupLeftSuccess": "You have left the group successfully."
+    "groupLeftSuccess": "You have left the group successfully.",
+    "appearance": "Appearance",
+    "appearance_system": "System",
+    "appearance_light": "Light",
+    "appearance_dark": "Dark"
 }
