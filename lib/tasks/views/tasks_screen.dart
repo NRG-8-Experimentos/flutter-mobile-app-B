@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:synhub_flutter/tasks/views/task_detail.dart';
+
 import '../../l10n/app_localizations.dart';
 import '../../requests/bloc/request_bloc.dart';
 import '../bloc/task/task_bloc.dart';
@@ -213,21 +215,6 @@ class _TasksScreenState extends State<TasksScreen> {
                 decoration: BoxDecoration(color: progressColor, borderRadius: BorderRadius.circular(4)),
               ),
               if (task.status == "IN_PROGRESS") ...[
-                const SizedBox(height: 12),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(contextT,
-                          MaterialPageRoute(builder: (context) => CreateRequestScreen(task: task)));
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFF9800),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    child: Text(localizations.sendComment,
-                        style: const TextStyle(fontSize: 18, color: Colors.white)),
-                  ),
-                ),
                 const SizedBox(height: 12),
                 Center(
                   child: ElevatedButton(
