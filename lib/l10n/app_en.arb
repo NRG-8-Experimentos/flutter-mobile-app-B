@@ -108,5 +108,12 @@
     "appearance": "Appearance",
     "appearance_system": "System",
     "appearance_light": "Light",
-    "appearance_dark": "Dark"
+    "appearance_dark": "Dark",
+    "commentsTitle": "Comments",
+    "addCommentButton": "Add",
+    "sendCommentButton": "Send comment",
+    "commentsLoadError": "Could not load comments",
+    "commentAddedSuccess": "Comment added successfully",
+    "commentAddError": "Could not add comment",
+    "noCommentsYet": "No comments yet"
 }

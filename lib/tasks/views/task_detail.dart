@@ -88,20 +88,17 @@ class _TaskDetailState extends State<TaskDetail> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Center(
-                      child: Text(
-                        task.title,
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onSurface)
-                        ),
-                      ),
+                        child: Text(
+                            task.title,
+                            style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.onSurface)
+                        )
                     ),
                     Container(
                       height: 2,
-                      decoration: BoxDecoration(
-                          color: Colors.black
-                      ),
+                      decoration: BoxDecoration(color: Colors.black),
                     ),
                     const SizedBox(height: 12),
                     ConstrainedBox(
@@ -109,32 +106,24 @@ class _TaskDetailState extends State<TaskDetail> {
                         maxHeight: 100,
                         minWidth: double.infinity,
                       ),
-                      child: Card(
-                        color: Colors.white,
-                        margin: EdgeInsets.symmetric(vertical: 10),
-                        elevation: 5,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child:
-                        Padding(
-                          padding: const EdgeInsets.all(15.0),
-                          child: Text(
-                            task.description,
-                            style: const TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface))
+                      child:
+                        Card(
+                          color: Colors.white,
+                          margin: EdgeInsets.symmetric(vertical: 10),
+                          elevation: 5,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child:
+                          Padding(
+                              padding: const EdgeInsets.all(15.0),
+                              child: Text(
+                                  task.description,
+                                  style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface))
                           ),
                         ),
-                      ),
                     ),
-                    const SizedBox(height: 12),
-                    Center(
-                      child: Text(
-                        formattedDates,
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                    ),
-                    // Barra de progreso con color según estado
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     Container(
                       height: 8,
                       decoration: BoxDecoration(
@@ -142,55 +131,55 @@ class _TaskDetailState extends State<TaskDetail> {
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     if (task.status == "IN_PROGRESS") ...[
                       Center(
                         child: ElevatedButton(
-                              onPressed: () async {
-                                final confirmation = await showDialog<bool>(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: Text(localizations.completed),
-                                    content: Text(localizations.confirmMarkCompleted),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.of(context).pop(false),
-                                        child: Text(localizations.cancel),
-                                      ),
-                                      TextButton(
-                                        onPressed: () => Navigator.of(context).pop(true),
-                                        child: Text(localizations.confirm, style: TextStyle(color: Colors.green)),
-                                      ),
-                                    ],
+                          onPressed: () async {
+                            final confirmation = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: Text(localizations.completed),
+                                content: Text(localizations.confirmMarkCompleted),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).pop(false),
+                                    child: Text(localizations.cancel),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).pop(true),
+                                    child: Text(localizations.confirm, style: TextStyle(color: Colors.green)),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (confirmation == true) {
+                              try {
+                                await context.read<RequestBloc>()
+                                    .requestService.createRequest(
+                                    task.id,
+                                    localizations.requestCompletionMessage,
+                                    'SUBMISSION'
+                                );
+                                context.read<TaskBloc>().add(
+                                  UpdateTaskStatusEvent(
+                                    taskId: task.id,
+                                    status: 'COMPLETED',
                                   ),
                                 );
-                                if (confirmation == true) {
-                                  try {
-                                    await context.read<RequestBloc>()
-                                        .requestService.createRequest(
-                                        task.id,
-                                        localizations.requestCompletionMessage,
-                                        'SUBMISSION'
-                                    );
-                                    context.read<TaskBloc>().add(
-                                      UpdateTaskStatusEvent(
-                                        taskId: task.id,
-                                        status: 'COMPLETED',
-                                      ),
-                                    );
 
-                                    if (!mounted) return;
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(localizations.requestCreatedSuccess)),
-                                    );
-                                  } catch (e) {
-                                    if (!mounted) return;
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(localizations.requestCreatedFailure)),
-                                    );
-                                  }
-                                }
-                              },
+                                if (!mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(localizations.requestCreatedSuccess)),
+                                );
+                              } catch (e) {
+                                if (!mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(localizations.requestCreatedFailure)),
+                                );
+                              }
+                            }
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xff4CAF50),
                             shape: RoundedRectangleBorder(
@@ -202,14 +191,14 @@ class _TaskDetailState extends State<TaskDetail> {
                       ),
                     ]
                   ],
-                ),
+                )
               ),
             ),
             const SizedBox(height: 20),
             _buildCommentsSection(task),
           ],
         ),
-      ),
+      )
     );
   }
 
@@ -264,7 +253,7 @@ class _TaskDetailState extends State<TaskDetail> {
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No se pudieron cargar los comentarios')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.commentsLoadError)),
         );
       }
     }
@@ -303,7 +292,7 @@ class _TaskDetailState extends State<TaskDetail> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Comentario agregado exitosamente')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.commentAddedSuccess)),
         );
       }
     } catch (e) {
@@ -312,13 +301,14 @@ class _TaskDetailState extends State<TaskDetail> {
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No se pudo agregar el comentario')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.commentAddError)),
         );
       }
     }
   }
 
   Widget _buildCommentsSection(Task task) {
+    final localizations = AppLocalizations.of(context)!;
     return Card(
       color: Color(0xFFF5F5F5),
       elevation: 4,
@@ -334,7 +324,7 @@ class _TaskDetailState extends State<TaskDetail> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Comentarios',
+                  localizations.commentsTitle,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -344,10 +334,15 @@ class _TaskDetailState extends State<TaskDetail> {
                   ElevatedButton.icon(
                     onPressed: _toggleCommentForm,
                     icon: Icon(_showCommentForm ? Icons.close : Icons.add_comment),
-                    label: Text(_showCommentForm ? 'Cancelar' : 'Agregar'),
+                    label: Text(_showCommentForm ? localizations.cancel : localizations.addCommentButton),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _showCommentForm ? Colors.grey : Color(0xFFFF9800),
-                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black87,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      elevation: 2,
+                      side: BorderSide(color: Colors.grey.shade300),
                     ),
                   )
               ],
@@ -365,7 +360,7 @@ class _TaskDetailState extends State<TaskDetail> {
                         controller: _commentController,
                         maxLines: 4,
                         decoration: InputDecoration(
-                          hintText: 'Escribe tu comentario aquí...',
+                          hintText: localizations.commentHint,
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -388,7 +383,7 @@ class _TaskDetailState extends State<TaskDetail> {
                                   ),
                                 )
                               : Text(
-                                  'Enviar comentario',
+                                  localizations.sendCommentButton,
                                   style: TextStyle(fontSize: 16, color: Colors.white),
                                 ),
                         ),
@@ -411,7 +406,7 @@ class _TaskDetailState extends State<TaskDetail> {
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: Text(
-                    'No hay comentarios aún',
+                    localizations.noCommentsYet,
                     style: TextStyle(
                       color: Colors.grey,
                       fontSize: 16,

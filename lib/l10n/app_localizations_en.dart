@@ -342,4 +342,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appearance_dark => 'Dark';
+
+  @override
+  String get commentsTitle => 'Comments';
+
+  @override
+  String get addCommentButton => 'Add';
+
+  @override
+  String get sendCommentButton => 'Send comment';
+
+  @override
+  String get commentsLoadError => 'Could not load comments';
+
+  @override
+  String get commentAddedSuccess => 'Comment added successfully';
+
+  @override
+  String get commentAddError => 'Could not add comment';
+
+  @override
+  String get noCommentsYet => 'No comments yet';
 }

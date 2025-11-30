@@ -751,6 +751,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dark'**
   String get appearance_dark;
+
+  /// No description provided for @commentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Comments'**
+  String get commentsTitle;
+
+  /// No description provided for @addCommentButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get addCommentButton;
+
+  /// No description provided for @sendCommentButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Send comment'**
+  String get sendCommentButton;
+
+  /// No description provided for @commentsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load comments'**
+  String get commentsLoadError;
+
+  /// No description provided for @commentAddedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment added successfully'**
+  String get commentAddedSuccess;
+
+  /// No description provided for @commentAddError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not add comment'**
+  String get commentAddError;
+
+  /// No description provided for @noCommentsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No comments yet'**
+  String get noCommentsYet;
 }
 
 class _AppLocalizationsDelegate
