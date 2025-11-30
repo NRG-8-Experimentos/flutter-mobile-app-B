@@ -372,15 +372,16 @@ class _TaskDetailState extends State<TaskDetail> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                ElevatedButton.icon(
-                  onPressed: _toggleCommentForm,
-                  icon: Icon(_showCommentForm ? Icons.close : Icons.add_comment),
-                  label: Text(_showCommentForm ? 'Cancelar' : 'Agregar'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _showCommentForm ? Colors.grey : Color(0xFFFF9800),
-                    foregroundColor: Colors.white,
-                  ),
-                ),
+                if(task.status == "IN_PROGRESS")
+                  ElevatedButton.icon(
+                    onPressed: _toggleCommentForm,
+                    icon: Icon(_showCommentForm ? Icons.close : Icons.add_comment),
+                    label: Text(_showCommentForm ? 'Cancelar' : 'Agregar'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _showCommentForm ? Colors.grey : Color(0xFFFF9800),
+                      foregroundColor: Colors.white,
+                    ),
+                  )
               ],
             ),
             const SizedBox(height: 16),
