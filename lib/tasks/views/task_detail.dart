@@ -29,7 +29,6 @@ class _TaskDetailState extends State<TaskDetail> {
   @override
   void initState() {
     super.initState();
-    // Load comments when the screen initializes
     _loadComments(widget.taskId);
   }
 
@@ -41,7 +40,7 @@ class _TaskDetailState extends State<TaskDetail> {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
 
     return BlocProvider(
       create: (context) => TaskBloc(taskService: TaskService())..add(LoadTaskByIdEvent(widget.taskId)),
@@ -49,16 +48,21 @@ class _TaskDetailState extends State<TaskDetail> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-          title: Text(localizations.taskDetailTitle,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold,
-                  color: Theme.of(context).appBarTheme.foregroundColor)),
+          title: Text(
+            l10n.taskDetailTitle,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).appBarTheme.foregroundColor,
+            ),
+          ),
         ),
         body: BlocBuilder<TaskBloc, TaskState>(
           builder: (context, state) {
             if (state is TaskLoading) return const Center(child: CircularProgressIndicator());
             if (state is TaskDetailLoaded) return _buildTaskCard(context, state.task);
             if (state is TaskError) return Center(child: Text(state.message));
-            return Center(child: Text(localizations.taskNotFound));
+            return Center(child: Text(l10n.taskNotFound));
           },
         ),
       ),
@@ -66,9 +70,10 @@ class _TaskDetailState extends State<TaskDetail> {
   }
 
   Widget _buildTaskCard(BuildContext context, Task task) {
-    final localizations = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
     final progressColor = _getDividerColor(task.createdAt, task.dueDate, task.status);
-    final formattedDates = _formatTaskDates(task);
 
     return SingleChildScrollView(
       child: Padding(
@@ -76,11 +81,9 @@ class _TaskDetailState extends State<TaskDetail> {
         child: Column(
           children: [
             Card(
-              color: Theme.of(context).colorScheme.surfaceVariant,
+              color: cs.surfaceVariant,
               elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -88,50 +91,39 @@ class _TaskDetailState extends State<TaskDetail> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Center(
-                        child: Text(
-                            task.title,
-                            style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.onSurface)
-                        )
+                      child: Text(
+                        task.title,
+                        style: tt.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: cs.onSurface,
+                        ),
+                      ),
                     ),
-                    Container(
-                      height: 2,
-                      decoration: BoxDecoration(color: Colors.black),
-                    ),
+                    const SizedBox(height: 8),
+                    Container(height: 2, color: Theme.of(context).dividerColor),
                     const SizedBox(height: 12),
                     ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxHeight: 100,
-                        minWidth: double.infinity,
-                      ),
-                      child:
-                        Card(
-                          color: Colors.white,
-                          margin: EdgeInsets.symmetric(vertical: 10),
-                          elevation: 5,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child:
-                          Padding(
-                              padding: const EdgeInsets.all(15.0),
-                              child: Text(
-                                  task.description,
-                                  style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface))
+                      constraints: const BoxConstraints(maxHeight: 100, minWidth: double.infinity),
+                      child: Card(
+                        color: Theme.of(context).cardColor,
+                        margin: const EdgeInsets.symmetric(vertical: 10),
+                        elevation: 5,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Text(
+                            task.description,
+                            style: tt.bodyMedium?.copyWith(color: cs.onSurface),
                           ),
                         ),
-                    ),
-                    SizedBox(height: 12),
-                    Container(
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: progressColor,
-                        borderRadius: BorderRadius.circular(4),
                       ),
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
+                    Container(
+                      height: 8,
+                      decoration: BoxDecoration(color: progressColor, borderRadius: BorderRadius.circular(4)),
+                    ),
+                    const SizedBox(height: 12),
                     if (task.status == "IN_PROGRESS") ...[
                       Center(
                         child: ElevatedButton(
@@ -139,66 +131,63 @@ class _TaskDetailState extends State<TaskDetail> {
                             final confirmation = await showDialog<bool>(
                               context: context,
                               builder: (context) => AlertDialog(
-                                title: Text(localizations.completed),
-                                content: Text(localizations.confirmMarkCompleted),
+                                title: Text(l10n.completed),
+                                content: Text(l10n.confirmMarkCompleted),
                                 actions: [
                                   TextButton(
                                     onPressed: () => Navigator.of(context).pop(false),
-                                    child: Text(localizations.cancel),
+                                    child: Text(l10n.cancel),
                                   ),
                                   TextButton(
                                     onPressed: () => Navigator.of(context).pop(true),
-                                    child: Text(localizations.confirm, style: TextStyle(color: Colors.green)),
+                                    child: Text(
+                                      l10n.confirm,
+                                      style: TextStyle(color: cs.primary),
+                                    ),
                                   ),
                                 ],
                               ),
                             );
                             if (confirmation == true) {
                               try {
-                                await context.read<RequestBloc>()
-                                    .requestService.createRequest(
-                                    task.id,
-                                    localizations.requestCompletionMessage,
-                                    'SUBMISSION'
+                                await context.read<RequestBloc>().requestService.createRequest(
+                                  task.id,
+                                  l10n.requestCompletionMessage,
+                                  'SUBMISSION',
                                 );
                                 context.read<TaskBloc>().add(
-                                  UpdateTaskStatusEvent(
-                                    taskId: task.id,
-                                    status: 'COMPLETED',
-                                  ),
+                                  UpdateTaskStatusEvent(taskId: task.id, status: 'COMPLETED'),
                                 );
-
                                 if (!mounted) return;
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(localizations.requestCreatedSuccess)),
+                                  SnackBar(content: Text(l10n.requestCreatedSuccess)),
                                 );
-                              } catch (e) {
+                              } catch (_) {
                                 if (!mounted) return;
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(localizations.requestCreatedFailure)),
+                                  SnackBar(content: Text(l10n.requestCreatedFailure)),
                                 );
                               }
                             }
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xff4CAF50),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
+                            backgroundColor: cs.primary,
+                            foregroundColor: cs.onPrimary,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
-                          child: Text(localizations.markAsCompleted, style: TextStyle(fontSize: 18, color: Colors.white)),
+                          child: Text(l10n.markAsCompleted, style: tt.titleMedium?.copyWith(color: cs.onPrimary)),
                         ),
                       ),
-                    ]
+                    ],
                   ],
-                )
+                ),
               ),
             ),
             const SizedBox(height: 20),
             _buildCommentsSection(task),
           ],
         ),
-      )
+      ),
     );
   }
 
@@ -235,12 +224,8 @@ class _TaskDetailState extends State<TaskDetail> {
     }
   }
 
-
   Future<void> _loadComments(int taskId) async {
-    setState(() {
-      _loadingComments = true;
-    });
-
+    setState(() => _loadingComments = true);
     try {
       final comments = await _requestService.getRequestsByTaskId(taskId);
       setState(() {
@@ -248,9 +233,7 @@ class _TaskDetailState extends State<TaskDetail> {
         _loadingComments = false;
       });
     } catch (e) {
-      setState(() {
-        _loadingComments = false;
-      });
+      setState(() => _loadingComments = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(AppLocalizations.of(context)!.commentsLoadError)),
@@ -262,43 +245,28 @@ class _TaskDetailState extends State<TaskDetail> {
   void _toggleCommentForm() {
     setState(() {
       _showCommentForm = !_showCommentForm;
-      if (!_showCommentForm) {
-        _commentController.clear();
-      }
+      if (!_showCommentForm) _commentController.clear();
     });
   }
 
   Future<void> _addComment(int taskId) async {
     if (_commentController.text.trim().isEmpty) return;
-
-    setState(() {
-      _savingComment = true;
-    });
-
+    setState(() => _savingComment = true);
     try {
-      await _requestService.createRequest(
-        taskId,
-        _commentController.text.trim(),
-        'MODIFICATION',
-      );
-
+      await _requestService.createRequest(taskId, _commentController.text.trim(), 'MODIFICATION');
       _commentController.clear();
       setState(() {
         _savingComment = false;
         _showCommentForm = false;
       });
-
       await _loadComments(taskId);
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(AppLocalizations.of(context)!.commentAddedSuccess)),
         );
       }
-    } catch (e) {
-      setState(() {
-        _savingComment = false;
-      });
+    } catch (_) {
+      setState(() => _savingComment = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(AppLocalizations.of(context)!.commentAddError)),
@@ -308,13 +276,14 @@ class _TaskDetailState extends State<TaskDetail> {
   }
 
   Widget _buildCommentsSection(Task task) {
-    final localizations = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
+
     return Card(
-      color: Color(0xFFF5F5F5),
+      color: cs.surfaceVariant,
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -323,34 +292,28 @@ class _TaskDetailState extends State<TaskDetail> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  localizations.commentsTitle,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                if(task.status == "IN_PROGRESS")
-                  ElevatedButton.icon(
+                Text(l10n.commentsTitle,
+                    style: tt.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: cs.onSurface)),
+                if (task.status == "IN_PROGRESS")
+                  OutlinedButton.icon(
                     onPressed: _toggleCommentForm,
-                    icon: Icon(_showCommentForm ? Icons.close : Icons.add_comment),
-                    label: Text(_showCommentForm ? localizations.cancel : localizations.addCommentButton),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black87,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      elevation: 2,
-                      side: BorderSide(color: Colors.grey.shade300),
+                    icon: Icon(_showCommentForm ? Icons.close : Icons.add_comment, color: cs.onSurface),
+                    label: Text(
+                      _showCommentForm ? l10n.cancel : l10n.addCommentButton,
+                      style: tt.labelLarge?.copyWith(color: cs.onSurface),
                     ),
-                  )
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: Theme.of(context).dividerColor),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      backgroundColor: Theme.of(context).cardColor,
+                    ),
+                  ),
               ],
             ),
             const SizedBox(height: 16),
             if (_showCommentForm) ...[
               Card(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 elevation: 2,
                 child: Padding(
                   padding: const EdgeInsets.all(12.0),
@@ -360,8 +323,8 @@ class _TaskDetailState extends State<TaskDetail> {
                         controller: _commentController,
                         maxLines: 4,
                         decoration: InputDecoration(
-                          hintText: localizations.commentHint,
-                          border: OutlineInputBorder(),
+                          hintText: l10n.commentHint,
+                          border: const OutlineInputBorder(),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -370,22 +333,16 @@ class _TaskDetailState extends State<TaskDetail> {
                         child: ElevatedButton(
                           onPressed: _savingComment ? null : () => _addComment(task.id),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF4CAF50),
-                            padding: EdgeInsets.symmetric(vertical: 12),
+                            backgroundColor: cs.primary,
+                            foregroundColor: cs.onPrimary,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
                           child: _savingComment
-                              ? SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : Text(
-                                  localizations.sendCommentButton,
-                                  style: TextStyle(fontSize: 16, color: Colors.white),
-                                ),
+                              ? const SizedBox(
+                            height: 20, width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                              : Text(l10n.sendCommentButton, style: tt.titleMedium?.copyWith(color: cs.onPrimary)),
                         ),
                       ),
                     ],
@@ -395,34 +352,23 @@ class _TaskDetailState extends State<TaskDetail> {
               const SizedBox(height: 16),
             ],
             if (_loadingComments)
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: CircularProgressIndicator(),
-                ),
-              )
+              const Center(child: Padding(padding: EdgeInsets.all(20.0), child: CircularProgressIndicator()))
             else if (_comments.isEmpty)
               Center(
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: Text(
-                    localizations.noCommentsYet,
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 16,
-                    ),
+                    l10n.noCommentsYet,
+                    style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
                   ),
                 ),
               )
             else
               ListView.builder(
                 shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: _comments.length,
-                itemBuilder: (context, index) {
-                  final comment = _comments[index];
-                  return _buildCommentItem(comment);
-                },
+                itemBuilder: (context, index) => _buildCommentItem(_comments[index]),
               ),
           ],
         ),
@@ -431,36 +377,25 @@ class _TaskDetailState extends State<TaskDetail> {
   }
 
   Widget _buildCommentItem(Request comment) {
+    final cs = Theme.of(context).colorScheme;
     Color statusColor;
     switch (comment.requestStatus) {
-      case 'PENDING':
-        statusColor = Colors.orange;
-        break;
-      case 'APPROVED':
-        statusColor = Colors.green;
-        break;
-      case 'REJECTED':
-        statusColor = Colors.red;
-        break;
-      default:
-        statusColor = Colors.grey;
+      case 'PENDING':  statusColor = Colors.orange; break;
+      case 'APPROVED': statusColor = Colors.green;  break;
+      case 'REJECTED': statusColor = Colors.red;    break;
+      default:         statusColor = cs.onSurfaceVariant;
     }
 
     Color typeColor;
     switch (comment.requestType) {
-      case 'MODIFICATION':
-        typeColor = Colors.blue;
-        break;
-      case 'SUBMISSION':
-        typeColor = Colors.purple;
-        break;
-      default:
-        typeColor = Colors.grey;
+      case 'MODIFICATION': typeColor = Colors.blue;   break;
+      case 'SUBMISSION':   typeColor = Colors.purple; break;
+      default:             typeColor = cs.onSurfaceVariant;
     }
 
     return Card(
-      color: Colors.white,
-      margin: EdgeInsets.only(bottom: 12),
+      color: Theme.of(context).cardColor,
+      margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(12.0),
@@ -470,43 +405,32 @@ class _TaskDetailState extends State<TaskDetail> {
             Row(
               children: [
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: typeColor.withValues(alpha: 0.2),
+                    color: typeColor.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     comment.requestType,
-                    style: TextStyle(
-                      color: typeColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: typeColor, fontWeight: FontWeight.bold, fontSize: 12),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.2),
+                    color: statusColor.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     comment.requestStatus,
-                    style: TextStyle(
-                      color: statusColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 12),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-            Text(
-              comment.description,
-              style: TextStyle(fontSize: 14),
-            ),
+            Text(comment.description, style: Theme.of(context).textTheme.bodyMedium),
           ],
         ),
       ),

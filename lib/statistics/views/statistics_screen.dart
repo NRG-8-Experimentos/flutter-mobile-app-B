@@ -9,14 +9,12 @@ import '../services/statistics_service.dart';
 import '../services/kanban_service.dart';
 import '../models/kanban_column.dart';
 import '../../tasks/models/task.dart';
-import 'package:intl/intl.dart';
 
-// Se mantienen colores de marca
+// Colores de marca (solo acentos)
 const Color kBluePrimary = Color(0xFF1A4E85);
-const Color kBlueLight = Color(0xFFE3F2FD);
+const Color kBlueLight   = Color(0xFFE3F2FD);
 const Color kBlueLighter = Color(0xFFF0F6FF);
-const Color kBlueAccent = Color(0xFF1976D2);
-const Color kBlueCard = Color(0xFFF5F9FF);
+const Color kBlueAccent  = Color(0xFF1976D2);
 
 class StatisticsScreen extends StatefulWidget {
   final String memberId;
@@ -50,37 +48,17 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   Future<void> _fetchMemberTasks() async {
     try {
-      print('Fetching tasks for member: ${widget.memberId}');
-
-      // Intentar primero con el endpoint directo de miembro
       List<Task> tasks = await StatisticsService().fetchMemberTasks(widget.memberId);
-
-      // Si no hay tareas, intentar con el método por estado
       if (tasks.isEmpty) {
-        print('No tasks from direct endpoint, trying by status...');
         tasks = await StatisticsService().fetchMemberTasksByStatus(widget.memberId);
       }
-
-      print('Tasks received: ${tasks.length}');
-
-      for (var task in tasks) {
-        print('Task: ${task.title}, Status: ${task.status}');
-      }
-
       final columns = _kanbanService.organizeTasksIntoColumns(tasks);
-      print('Columns created: ${columns.length}');
-
-      for (var column in columns) {
-        print('Column ${column.title}: ${column.tasks.length} tasks');
-      }
-
       setState(() {
         _memberTasks = tasks;
         _kanbanColumns = columns;
         _loadingTasks = false;
       });
     } catch (e) {
-      print('Error in _fetchMemberTasks: $e');
       setState(() {
         _memberTasks = [];
         _kanbanColumns = [];
@@ -91,7 +69,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
 
     return BlocProvider(
       create: (_) => StatisticsBloc(StatisticsService())..add(LoadMemberStatistics(widget.memberId)),
@@ -99,7 +77,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-          title: Text(localizations.statisticsTitle, style: TextStyle(color: Theme.of(context).appBarTheme.foregroundColor)),
+          title: Text(
+            l10n.statisticsTitle,
+            style: TextStyle(color: Theme.of(context).appBarTheme.foregroundColor),
+          ),
           iconTheme: IconThemeData(color: Theme.of(context).appBarTheme.foregroundColor),
           elevation: 0,
         ),
@@ -109,12 +90,16 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               return const Center(child: CircularProgressIndicator());
             } else if (state is StatisticsLoaded) {
               final stats = state.statistics;
+              final cs = Theme.of(context).colorScheme;
+              final tt = Theme.of(context).textTheme;
+
               return Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // Header de usuario
                       Card(
                         color: Theme.of(context).cardColor,
                         elevation: 6,
@@ -125,7 +110,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                             children: [
                               CircleAvatar(
                                 radius: 28,
-                                backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                                backgroundColor: cs.surfaceVariant,
                                 backgroundImage: widget.profileImageUrl.isNotEmpty
                                     ? NetworkImage(widget.profileImageUrl)
                                     : null,
@@ -139,14 +124,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(widget.memberName,
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold, fontSize: 18, color: kBluePrimary)),
+                                        style: tt.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: cs.onSurface,
+                                        )),
                                     const SizedBox(height: 2),
-                                    Text(widget.username,
-                                      style: TextStyle(
-                                        color: Theme.of(context).colorScheme.onSurface.withOpacity(.6),
-                                        fontSize: 14,
-                                      ),
+                                    Text(
+                                      widget.username,
+                                      style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                                     ),
                                   ],
                                 ),
@@ -157,31 +142,33 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       ),
                       const SizedBox(height: 16),
 
+                      // KPIs
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            _StatCard(label: localizations.statMarkedCompleted, value: stats.overview.completed.toString(), color: Colors.green),
-                            _StatCard(label: localizations.completed, value: (stats.overview.done ?? 0).toString(), color: Colors.teal),
-                            _StatCard(label: localizations.inProgress, value: stats.overview.inProgress.toString(), color: Colors.blue),
-                            _StatCard(label: localizations.statPending, value: stats.overview.pending.toString(), color: Colors.orange),
-                            _StatCard(label: localizations.statOverdue, value: stats.overview.overdue.toString(), color: Colors.red),
+                            _StatCard(label: l10n.statMarkedCompleted, value: stats.overview.completed.toString(), color: Colors.green),
+                            _StatCard(label: l10n.completed,           value: (stats.overview.done ?? 0).toString(), color: Colors.teal),
+                            _StatCard(label: l10n.inProgress,          value: stats.overview.inProgress.toString(),   color: Colors.blue),
+                            _StatCard(label: l10n.statPending,         value: stats.overview.pending.toString(),      color: Colors.orange),
+                            _StatCard(label: l10n.statOverdue,         value: stats.overview.overdue.toString(),      color: Colors.red),
                           ],
                         ),
                       ),
                       const SizedBox(height: 18),
-                      // Tablero Kanban
+
+                      // Kanban
                       _SectionCard(
                         icon: Icons.view_kanban,
                         title: 'Tablero de Tareas',
                         child: _buildKanbanBoard(),
                       ),
                       const SizedBox(height: 18),
-                      // Distribución de tareas debajo de las cajas de estado
+
+                      // Distribución de tareas
                       _SectionCard(
                         icon: Icons.list_alt,
-                        title: localizations.tasksDistribution,
+                        title: l10n.tasksDistribution,
                         child: ConstrainedBox(
                           constraints: const BoxConstraints(maxHeight: 200),
                           child: _loadingTasks
@@ -192,8 +179,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                               : _memberTasks.isEmpty
                               ? Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Text(localizations.noAssignedTasks,
-                                style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(.7))),
+                            child: Text(
+                              l10n.noAssignedTasks,
+                              style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+                            ),
                           )
                               : Scrollbar(
                             thumbVisibility: true,
@@ -207,14 +196,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                   padding: const EdgeInsets.symmetric(vertical: 2.0),
                                   child: Row(
                                     children: [
-                                      const Text('•',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold, color: kBluePrimary)),
+                                      Icon(Icons.circle, size: 6, color: cs.primary),
                                       const SizedBox(width: 8),
                                       Expanded(
-                                        child: Text(task.title,
-                                            style: TextStyle(
-                                                fontSize: 15, color: Theme.of(context).colorScheme.onSurface)),
+                                        child: Text(
+                                          task.title,
+                                          style: tt.bodyMedium?.copyWith(color: cs.onSurface),
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -226,28 +214,26 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       ),
                       const SizedBox(height: 18),
 
+                      // Reprogramaciones
                       _SectionCard(
                         icon: Icons.build,
-                        title: localizations.totalReschedules,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _MetricRow(label: localizations.rescheduled, value: stats.rescheduledTasks.rescheduled.toString()),
-                          ],
-                        ),
+                        title: l10n.totalReschedules,
+                        child: _MetricRow(label: l10n.rescheduled, value: stats.rescheduledTasks.rescheduled.toString()),
                       ),
                       const SizedBox(height: 18),
 
+                      // Tiempo promedio
                       _SectionCard(
                         icon: Icons.date_range,
-                        title: localizations.avgCompletionTimeTitle,
+                        title: l10n.avgCompletionTimeTitle,
                         child: Row(
                           children: [
-                            const Icon(Icons.timer, color: kBlueAccent),
+                            Icon(Icons.timer, color: cs.primary),
                             const SizedBox(width: 8),
-                            Text(_formatAvgCompletionTime(stats.avgCompletionTime.avgDays),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 16, color: kBlueAccent)),
+                            Text(
+                              _formatAvgCompletionTime(stats.avgCompletionTime.avgDays),
+                              style: tt.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: cs.primary),
+                            ),
                           ],
                         ),
                       ),
@@ -266,15 +252,18 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildKanbanBoard() {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     if (_loadingTasks) {
-      return const Padding(
-        padding: EdgeInsets.all(40.0),
+      return Padding(
+        padding: const EdgeInsets.all(40.0),
         child: Center(
           child: Column(
             children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('Cargando tablero...', style: TextStyle(color: Colors.black54)),
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text('Cargando tablero...', style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
             ],
           ),
         ),
@@ -282,14 +271,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     }
 
     if (_kanbanColumns.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.all(40.0),
+      return Padding(
+        padding: const EdgeInsets.all(40.0),
         child: Center(
           child: Column(
             children: [
-              Icon(Icons.inbox, size: 48, color: Colors.black26),
-              SizedBox(height: 16),
-              Text('No hay tareas disponibles', style: TextStyle(color: Colors.black54)),
+              Icon(Icons.inbox, size: 48, color: cs.onSurfaceVariant),
+              const SizedBox(height: 16),
+              Text('No hay tareas disponibles', style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
             ],
           ),
         ),
@@ -302,30 +291,23 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(vertical: 8),
         itemCount: _kanbanColumns.length,
-        itemBuilder: (context, index) {
-          final column = _kanbanColumns[index];
-          return _buildKanbanColumn(column);
-        },
+        itemBuilder: (context, index) => _buildKanbanColumn(_kanbanColumns[index]),
       ),
     );
   }
 
   Widget _buildKanbanColumn(KanbanColumn column) {
-    final color = _parseColor(column.color);
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final headerColor = _parseColor(column.color);
 
     return Container(
       width: 300,
       margin: const EdgeInsets.only(right: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: kBluePrimary.withOpacity(0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: cs.shadow.withOpacity(0.08), blurRadius: 8, offset: const Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -334,11 +316,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: color,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-              ),
+              color: headerColor,
+              borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12)),
             ),
             child: Row(
               children: [
@@ -347,27 +326,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 Expanded(
                   child: Text(
                     column.title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
+                    style: tt.titleMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w600),
                   ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    '${column.tasks.length}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
+                  decoration: BoxDecoration(color: Colors.white.withOpacity(0.3), borderRadius: BorderRadius.circular(12)),
+                  child: Text('${column.tasks.length}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
               ],
             ),
@@ -375,29 +340,24 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           // Content
           Expanded(
             child: column.tasks.isEmpty
-                ? const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(20.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.inbox, size: 48, color: Colors.black26),
-                          SizedBox(height: 8),
-                          Text(
-                            'Sin tareas',
-                            style: TextStyle(color: Colors.black38, fontSize: 14),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
+                ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.inbox, size: 48, color: cs.onSurfaceVariant),
+                    const SizedBox(height: 8),
+                    Text('Sin tareas', style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+                  ],
+                ),
+              ),
+            )
                 : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: column.tasks.length,
-                    itemBuilder: (context, index) {
-                      return _buildTaskCard(column.tasks[index]);
-                    },
-                  ),
+              padding: const EdgeInsets.all(16),
+              itemCount: column.tasks.length,
+              itemBuilder: (context, index) => _buildTaskCard(column.tasks[index]),
+            ),
           ),
         ],
       ),
@@ -405,14 +365,17 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildTaskCard(Task task) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return GestureDetector(
       onTap: () => _showTaskDetailsDialog(task),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: kBlueLighter,
-          border: Border.all(color: kBlueLight),
+          color: cs.surfaceVariant,
+          border: Border.all(color: Theme.of(context).dividerColor),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
@@ -425,30 +388,25 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 Expanded(
                   child: Text(
                     task.title,
-                    style: const TextStyle(
+                    style: tt.titleSmall?.copyWith(
                       fontWeight: FontWeight.w600,
-                      fontSize: 15,
-                      color: kBluePrimary,
+                      color: cs.primary,
                     ),
                   ),
                 ),
-                const Icon(Icons.more_vert, color: Colors.black38, size: 20),
+                Icon(Icons.more_vert, color: cs.onSurfaceVariant, size: 20),
               ],
             ),
             const SizedBox(height: 8),
             // Description
             Text(
               task.description,
-              style: const TextStyle(
-                fontSize: 13,
-                color: Colors.black54,
-                height: 1.4,
-              ),
+              style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant, height: 1.4),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 12),
-            const Divider(height: 1, color: kBlueLight),
+            Divider(height: 1, color: Theme.of(context).dividerColor),
             const SizedBox(height: 12),
             // Footer
             Row(
@@ -456,12 +414,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 Expanded(
                   child: Row(
                     children: [
-                      const Icon(Icons.event, size: 16, color: Colors.black54),
+                      Icon(Icons.event, size: 16, color: cs.onSurfaceVariant),
                       const SizedBox(width: 6),
                       Flexible(
                         child: Text(
                           _formatDate(task.dueDate),
-                          style: const TextStyle(fontSize: 12, color: Colors.black54),
+                          style: tt.labelSmall?.copyWith(color: cs.onSurfaceVariant),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -472,20 +430,19 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFfef3c7),
+                      color: cs.tertiaryContainer,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.sync, size: 14, color: Color(0xFF92400e)),
+                        Icon(Icons.sync, size: 14, color: cs.onTertiaryContainer),
                         const SizedBox(width: 4),
                         Text(
                           '${task.timesRearranged}',
-                          style: const TextStyle(
-                            fontSize: 12,
+                          style: tt.labelSmall?.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF92400e),
+                            color: cs.onTertiaryContainer,
                           ),
                         ),
                       ],
@@ -500,15 +457,17 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   void _showTaskDetailsDialog(Task task) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: Container(
             constraints: const BoxConstraints(maxWidth: 400),
+            color: Theme.of(context).cardColor,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -517,10 +476,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: _getStatusColor(task.status),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
-                    ),
+                    borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
                   ),
                   child: Row(
                     children: [
@@ -529,30 +485,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Detalles de la Tarea',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _getStatusLabel(task.status),
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 12,
-                              ),
-                            ),
+                          children: const [
+                            Text('Detalles de la Tarea',
+                                style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
                           ],
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.close, color: Colors.white),
-                        onPressed: () => Navigator.of(context).pop(),
-                      ),
+                      IconButton(icon: const Icon(Icons.close, color: Colors.white), onPressed: () => Navigator.of(context).pop()),
                     ],
                   ),
                 ),
@@ -563,67 +502,24 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Título
-                        const Text(
-                          'Título',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.black54,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        Text('Título', style: tt.labelSmall?.copyWith(color: cs.onSurfaceVariant, fontWeight: FontWeight.w600)),
                         const SizedBox(height: 6),
-                        Text(
-                          task.title,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: kBluePrimary,
-                          ),
-                        ),
+                        Text(task.title, style: tt.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: kBluePrimary)),
                         const SizedBox(height: 16),
                         const Divider(),
                         const SizedBox(height: 16),
-                        // Descripción
-                        const Text(
-                          'Descripción',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.black54,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        Text('Descripción', style: tt.labelSmall?.copyWith(color: cs.onSurfaceVariant, fontWeight: FontWeight.w600)),
                         const SizedBox(height: 6),
                         Text(
                           task.description.isNotEmpty ? task.description : 'Sin descripción',
-                          style: const TextStyle(
-                            fontSize: 15,
-                            color: Colors.black87,
-                            height: 1.5,
-                          ),
+                          style: tt.bodyMedium?.copyWith(color: cs.onSurface, height: 1.5),
                         ),
                         const SizedBox(height: 20),
-                        // Información adicional
-                        _buildDetailRow(
-                          icon: Icons.event,
-                          label: 'Fecha de vencimiento',
-                          value: _formatDate(task.dueDate),
-                          color: Colors.blue,
-                        ),
+                        _buildDetailRow(icon: Icons.event, label: 'Fecha de vencimiento', value: _formatDate(task.dueDate), color: Colors.blue),
                         const SizedBox(height: 12),
-                        _buildDetailRow(
-                          icon: Icons.calendar_today,
-                          label: 'Fecha de creación',
-                          value: _formatDate(task.createdAt),
-                          color: Colors.green,
-                        ),
+                        _buildDetailRow(icon: Icons.calendar_today, label: 'Fecha de creación', value: _formatDate(task.createdAt), color: Colors.green),
                         const SizedBox(height: 12),
-                        _buildDetailRow(
-                          icon: Icons.update,
-                          label: 'Última actualización',
-                          value: _formatDate(task.updatedAt),
-                          color: Colors.orange,
-                        ),
+                        _buildDetailRow(icon: Icons.update, label: 'Última actualización', value: _formatDate(task.updatedAt), color: Colors.orange),
                         if (task.timesRearranged > 0) ...[
                           const SizedBox(height: 12),
                           _buildDetailRow(
@@ -634,26 +530,18 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           ),
                         ],
                         const SizedBox(height: 20),
-                        // ID de la tarea
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: kBlueLighter,
+                            color: Theme.of(context).colorScheme.surfaceVariant,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: kBlueLight),
+                            border: Border.all(color: Theme.of(context).dividerColor),
                           ),
                           child: Row(
                             children: [
                               const Icon(Icons.tag, size: 18, color: kBluePrimary),
                               const SizedBox(width: 8),
-                              Text(
-                                'ID: ${task.id}',
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: kBluePrimary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+                              Text('ID: ${task.id}', style: tt.labelMedium?.copyWith(color: kBluePrimary, fontWeight: FontWeight.w600)),
                             ],
                           ),
                         ),
@@ -669,20 +557,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     child: ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: kBluePrimary,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
-                      child: const Text(
-                        'Cerrar',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
+                      child: const Text('Cerrar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                     ),
                   ),
                 ),
@@ -700,15 +580,15 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     required String value,
     required Color color,
   }) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
+          decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
           child: Icon(icon, size: 20, color: color),
         ),
         const SizedBox(width: 12),
@@ -716,22 +596,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.black54,
-                ),
-              ),
+              Text(label, style: tt.labelSmall?.copyWith(color: cs.onSurfaceVariant)),
               const SizedBox(height: 2),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-              ),
+              Text(value, style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: cs.onSurface)),
             ],
           ),
         ),
@@ -741,52 +608,23 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   Color _getStatusColor(String status) {
     switch (status.toUpperCase()) {
-      case 'ON_HOLD':
-        return Colors.orange;
-      case 'IN_PROGRESS':
-        return Colors.blue;
-      case 'COMPLETED':
-        return Colors.green;
-      case 'DONE':
-        return Colors.teal;
-      case 'EXPIRED':
-        return Colors.red;
-      default:
-        return kBluePrimary;
+      case 'ON_HOLD':    return Colors.orange;
+      case 'IN_PROGRESS':return Colors.blue;
+      case 'COMPLETED':  return Colors.green;
+      case 'DONE':       return Colors.teal;
+      case 'EXPIRED':    return Colors.red;
+      default:           return kBluePrimary;
     }
   }
 
   IconData _getStatusIcon(String status) {
     switch (status.toUpperCase()) {
-      case 'ON_HOLD':
-        return Icons.pause_circle_outline;
-      case 'IN_PROGRESS':
-        return Icons.autorenew;
-      case 'COMPLETED':
-        return Icons.check_circle;
-      case 'DONE':
-        return Icons.done_all;
-      case 'EXPIRED':
-        return Icons.error_outline;
-      default:
-        return Icons.task;
-    }
-  }
-
-  String _getStatusLabel(String status) {
-    switch (status.toUpperCase()) {
-      case 'ON_HOLD':
-        return 'Pendiente';
-      case 'IN_PROGRESS':
-        return 'En Progreso';
-      case 'COMPLETED':
-        return 'Completada';
-      case 'DONE':
-        return 'Terminada';
-      case 'EXPIRED':
-        return 'Atrasada';
-      default:
-        return status;
+      case 'ON_HOLD':    return Icons.pause_circle_outline;
+      case 'IN_PROGRESS':return Icons.autorenew;
+      case 'COMPLETED':  return Icons.check_circle;
+      case 'DONE':       return Icons.done_all;
+      case 'EXPIRED':    return Icons.error_outline;
+      default:           return Icons.task;
     }
   }
 
@@ -797,25 +635,17 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   IconData _getIconData(String iconName) {
     switch (iconName) {
-      case 'pause_circle_outline':
-        return Icons.pause_circle_outline;
-      case 'autorenew':
-        return Icons.autorenew;
-      case 'check_circle':
-        return Icons.check_circle;
-      case 'done_all':
-        return Icons.done_all;
-      case 'error_outline':
-        return Icons.error_outline;
-      default:
-        return Icons.task;
+      case 'pause_circle_outline': return Icons.pause_circle_outline;
+      case 'autorenew':            return Icons.autorenew;
+      case 'check_circle':         return Icons.check_circle;
+      case 'done_all':             return Icons.done_all;
+      case 'error_outline':        return Icons.error_outline;
+      default:                     return Icons.task;
     }
   }
 
   String _formatDate(String? dateString) {
-    if (dateString == null || dateString.isEmpty) {
-      return 'Sin fecha';
-    }
+    if (dateString == null || dateString.isEmpty) return 'Sin fecha';
     try {
       final date = DateTime.parse(dateString);
       return DateFormat('dd MMM yyyy', 'es_ES').format(date);
@@ -843,18 +673,14 @@ class _StatCard extends StatelessWidget {
   final Color color;
   const _StatCard({required this.label, required this.value, required this.color});
 
-  Color get vibrantBackground {
-    if (color == Colors.green) return const Color(0xFFB9F6CA);
-    if (color == Colors.blue)  return const Color(0xFF82B1FF);
-    if (color == Colors.orange)return const Color(0xFFFFE082);
-    if (color == Colors.red)   return const Color(0xFFFF8A80);
-    return color.withOpacity(0.15);
-  }
-
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = color.withOpacity(isDark ? 0.25 : 0.15);
+    final tt = Theme.of(context).textTheme;
+
     return Card(
-      color: vibrantBackground,
+      color: bg,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 2,
       margin: const EdgeInsets.symmetric(horizontal: 8),
@@ -863,16 +689,14 @@ class _StatCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(value, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: color)),
+            Text(value, style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: color)),
             const SizedBox(height: 6),
-            Flexible(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                child: Text(
-                  label,
-                  style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 13),
-                  textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis,
-                ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Text(
+                label,
+                style: tt.labelLarge?.copyWith(color: color, fontWeight: FontWeight.w600),
+                textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -890,6 +714,9 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Card(
       color: Theme.of(context).cardColor,
       elevation: 4,
@@ -902,12 +729,12 @@ class _SectionCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(icon, color: kBluePrimary),
+                Icon(icon, color: cs.primary),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     title,
-                    style: const TextStyle(color: kBluePrimary, fontWeight: FontWeight.bold, fontSize: 18),
+                    style: tt.titleMedium?.copyWith(color: cs.primary, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
@@ -928,14 +755,16 @@ class _MetricRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2.0),
       child: Row(
         children: [
-          Text(label, style: TextStyle(fontSize: 15, color: Theme.of(context).colorScheme.onSurface)),
+          Text(label, style: tt.bodyMedium?.copyWith(color: cs.onSurface)),
           const Spacer(),
-          const SizedBox(width: 8),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold, color: kBlueAccent)),
+          Text(value, style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: cs.primary)),
         ],
       ),
     );
