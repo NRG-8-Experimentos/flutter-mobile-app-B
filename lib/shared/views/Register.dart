@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../group/views/SearchGroup.dart';
+import '../../l10n/app_localizations.dart';
 import '../bloc/auth/auth_bloc.dart';
 import '../bloc/auth/auth_event.dart';
 import '../bloc/auth/auth_state.dart';
@@ -56,10 +57,11 @@ class _RegisterState extends State<Register> {
   }
 
   void _registerAndLogin(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     if (pass1Controller.text != pass2Controller.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Las contraseñas no coinciden'),
+        SnackBar(
+          content: Text(localizations.passwordMismatch),
           backgroundColor: Colors.red,
         ),
       );
@@ -68,9 +70,10 @@ class _RegisterState extends State<Register> {
 
     // Validación de correo electrónico
     if (!_isValidEmail(mailController.text)) {
+      final localizations = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Correo electrónico no válido'),
+        SnackBar(
+          content: Text(localizations.invalidEmail),
           backgroundColor: Colors.red,
         ),
       );
@@ -80,8 +83,8 @@ class _RegisterState extends State<Register> {
     // Validación de URL de foto de perfil (si no está vacío)
     if (urlPfpController.text.isNotEmpty && !_isValidUrl(urlPfpController.text)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('URL de foto de perfil no válida'),
+        SnackBar(
+          content: Text(localizations.invalidUrl),
           backgroundColor: Colors.red,
         ),
       );
@@ -104,6 +107,7 @@ class _RegisterState extends State<Register> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return BlocProvider.value(
       value: context.read<AuthBloc>(),
       child: BlocListener<AuthBloc, AuthState>(
@@ -140,9 +144,9 @@ class _RegisterState extends State<Register> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Text(
-                    'Registrarse',
-                    style: TextStyle(
+                  Text(
+                    localizations.register,
+                    style: const TextStyle(
                       fontSize: 60,
                       color: Color(0xFF000000),
                       fontWeight: FontWeight.bold,
@@ -156,8 +160,8 @@ class _RegisterState extends State<Register> {
                         child: TextField(
                           controller: nameController,
                           decoration: InputDecoration(
-                            labelText: 'Nombre',
-                            hintText: 'Nombre',
+                            labelText: localizations.name,
+                            hintText: localizations.name,
                             prefixIcon: const Icon(Icons.abc, color: Colors.grey),
                             filled: true,
                             fillColor: const Color(0xFFF3F3F3),
@@ -170,8 +174,8 @@ class _RegisterState extends State<Register> {
                         child: TextField(
                           controller: surnameController,
                           decoration: InputDecoration(
-                            labelText: 'Apellido',
-                            hintText: 'Apellido',
+                            labelText: localizations.surname,
+                            hintText: localizations.surname,
                             prefixIcon: const Icon(Icons.abc, color: Colors.grey),
                             filled: true,
                             fillColor: const Color(0xFFF3F3F3),
@@ -185,8 +189,8 @@ class _RegisterState extends State<Register> {
                   TextField(
                     controller: userController,
                     decoration: InputDecoration(
-                      labelText: 'Usuario',
-                      hintText: 'Usuario',
+                      labelText: localizations.user,
+                      hintText: localizations.user,
                       prefixIcon: const Icon(Icons.person, color: Colors.grey),
                       filled: true,
                       fillColor: const Color(0xFFF3F3F3),
@@ -197,8 +201,8 @@ class _RegisterState extends State<Register> {
                   TextField(
                     controller: mailController,
                     decoration: InputDecoration(
-                      labelText: 'Mail',
-                      hintText: 'Mail',
+                      labelText: localizations.mail,
+                      hintText: localizations.mail,
                       prefixIcon: const Icon(Icons.mail, color: Colors.grey),
                       filled: true,
                       fillColor: const Color(0xFFF3F3F3),
@@ -209,8 +213,8 @@ class _RegisterState extends State<Register> {
                   TextField(
                     controller: urlPfpController,
                     decoration: InputDecoration(
-                      labelText: 'Url Pfp',
-                      hintText: 'Url Pfp',
+                      labelText: localizations.urlPfp,
+                      hintText: localizations.urlPfp,
                       prefixIcon: const Icon(Icons.link, color: Colors.grey),
                       filled: true,
                       fillColor: const Color(0xFFF3F3F3),
@@ -222,8 +226,8 @@ class _RegisterState extends State<Register> {
                     controller: pass1Controller,
                     obscureText: true,
                     decoration: InputDecoration(
-                      labelText: 'Contraseña',
-                      hintText: 'Contraseña',
+                      labelText: localizations.password,
+                      hintText: localizations.password,
                       prefixIcon: const Icon(Icons.lock, color: Colors.grey),
                       filled: true,
                       fillColor: const Color(0xFFF3F3F3),
@@ -235,8 +239,8 @@ class _RegisterState extends State<Register> {
                     controller: pass2Controller,
                     obscureText: true,
                     decoration: InputDecoration(
-                      labelText: 'Confirmar Contraseña',
-                      hintText: 'Confirmar Contraseña',
+                      labelText: localizations.confirmPassword,
+                      hintText: localizations.confirmPassword,
                       prefixIcon: const Icon(Icons.lock, color: Colors.grey),
                       filled: true,
                       fillColor: const Color(0xFFF3F3F3),
@@ -263,9 +267,9 @@ class _RegisterState extends State<Register> {
                           strokeWidth: 2,
                         ),
                       )
-                          : const Text(
-                        'Registrarse',
-                        style: TextStyle(
+                          : Text(
+                        localizations.register,
+                        style: const TextStyle(
                           fontSize: 20,
                           color: Colors.white,
                           fontWeight: FontWeight.bold,

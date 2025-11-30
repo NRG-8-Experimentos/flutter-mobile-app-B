@@ -8,6 +8,7 @@ import 'package:synhub_flutter/statistics/bloc/statistics_state.dart';
 import 'package:synhub_flutter/statistics/services/statistics_service.dart';
 
 import '../../group/views/group_screen.dart';
+import '../../l10n/app_localizations.dart';
 import '../../statistics/views/statistics_screen.dart';
 import '../../tasks/models/task.dart';
 import '../../tasks/views/tasks_screen.dart';
@@ -16,15 +17,8 @@ import '../../shared/client/api_client.dart';
 import '../bloc/member/member_bloc.dart';
 import '../bloc/member/member_event.dart';
 import '../bloc/member/member_state.dart';
+import '../components/language_switcher_button.dart';
 import '../services/member_service.dart';
-
-const List<Map<String, dynamic>> drawerOptions = [
-  {'label': 'Grupo', 'icon': Icons.groups, 'route': 'Group'},
-  {'label': 'Solicitudes', 'icon': Icons.mail_outline, 'route': 'Requests'},
-  {'label': 'Tareas', 'icon': Icons.assignment_outlined, 'route': 'Tasks'},
-  {'label': 'Mi desempeño', 'icon': Icons.area_chart, 'route': 'AnalyticsAndReports'},
-  {'label': 'Cerrar sesión', 'icon': Icons.logout, 'route': 'Login'},
-];
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -50,6 +44,8 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+
+    final localizations = AppLocalizations.of(context)!;
 
     return BlocListener<MemberBloc, MemberState>(
       listener: (context, state) {
@@ -146,7 +142,7 @@ class _HomeState extends State<Home> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Resumen de métricas',
+                                        localizations.metricsSummary,
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold,
@@ -159,14 +155,14 @@ class _HomeState extends State<Home> {
                                           Icon(Icons.check_circle, color: Colors.greenAccent, size: 20),
                                           SizedBox(width: 4),
                                           Text(
-                                            'Terminadas: ${overview.done}',
+                                            '${localizations.completed}: ${overview.done}',
                                             style: TextStyle(color: Colors.white, fontSize: 14),
                                           ),
                                           SizedBox(width: 16),
                                           Icon(Icons.autorenew, color: Colors.blueAccent, size: 20),
                                           SizedBox(width: 4),
                                           Text(
-                                            'En progreso: ${overview.inProgress}',
+                                            '${localizations.inProgress}: ${overview.inProgress}',
                                             style: TextStyle(color: Colors.white, fontSize: 14),
                                           ),
                                         ],
@@ -206,7 +202,7 @@ class _HomeState extends State<Home> {
                         metricsSummary,
                         if (_memberId.isNotEmpty) SizedBox(height: 18),
                         // --- Fin resumen de métricas ---
-                        Text('Tu tarea más cercana a vencer', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1A4E85))),
+                        Text(localizations.taskDueSoon, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1A4E85))),
                         const SizedBox(height: 16),
                         SizedBox(
                           width: double.infinity,
@@ -281,7 +277,7 @@ class _HomeState extends State<Home> {
                         metricsSummary,
                         if (_memberId.isNotEmpty) SizedBox(height: 18),
                         // --- Fin resumen de métricas ---
-                        Text('Tu tarea más cercana', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1A4E85))),
+                        Text(localizations.taskDueSoon, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1A4E85))),
                         const SizedBox(height: 16),
                         SizedBox(
                           width: double.infinity,
@@ -293,7 +289,7 @@ class _HomeState extends State<Home> {
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(16),
-                              child: Center(child: Text('No tienes tareas próximas', style: const TextStyle(fontSize: 16, color: Colors.white))),
+                              child: Center(child: Text(localizations.noUpcomingTasks, style: const TextStyle(fontSize: 16, color: Colors.white))),
                             ),
                           ),
                         ),
@@ -387,6 +383,7 @@ class _CustomDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     const double gap = 15.0;
     return Drawer(
       child: Container(
@@ -435,30 +432,35 @@ class _CustomDrawer extends StatelessWidget {
             const SizedBox(height: gap),
             _buildDrawerItem(
               icon: Icons.groups,
-              label: 'Grupo',
+              label: localizations.group,
               onTap: () => onNavigate('Group'),
             ),
             _buildDrawerItem(
               icon: Icons.assignment_outlined,
-              label: 'Tareas',
+              label: localizations.tasks,
               onTap: () => onNavigate('Tasks'),
             ),
             _buildDrawerItem(
               icon: Icons.bar_chart,
-              label: 'Mi desempeño',
+              label: localizations.performance,
               onTap: () => onNavigate('AnalyticsAndReports'),
             ),
             _buildDrawerItem(
               icon: Icons.fact_check,
-              label: 'Solicitudes',
+              label: localizations.requests,
               onTap: () => onNavigate('Requests'),
             ),
             const SizedBox(height: gap),
             const Divider(color: Colors.white),
             const SizedBox(height: gap),
+            LanguageSwitcherButton(),
+            const SizedBox(height: gap),
+            const Divider(color: Colors.white),
+            const SizedBox(height: gap),
+            const SizedBox(height: gap),
             _buildDrawerItem(
               icon: Icons.logout,
-              label: 'Cerrar Sesión',
+              label: localizations.signOut,
               onTap: () => onNavigate('Login'),
             ),
           ],

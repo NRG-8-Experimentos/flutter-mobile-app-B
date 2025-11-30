@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../requests/bloc/request_bloc.dart';
 import '../../requests/models/request.dart';
 import '../../requests/services/request_service.dart';
@@ -43,6 +44,7 @@ class _TaskDetailState extends State<TaskDetail> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return BlocProvider(
       create: (context) => TaskBloc(taskService: TaskService())
         ..add(LoadTaskByIdEvent(widget.taskId)),
@@ -50,8 +52,8 @@ class _TaskDetailState extends State<TaskDetail> {
         backgroundColor: Colors.white,
         appBar: AppBar(
           backgroundColor: Colors.white,
-          title: const Text(
-            'Detalles de la tarea',
+          title: Text(
+              localizations.taskDetailTitle,
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
         ),
@@ -64,7 +66,7 @@ class _TaskDetailState extends State<TaskDetail> {
             } else if (state is TaskError) {
               return Center(child: Text(state.message));
             }
-            return const Center(child: Text('No se encontró la tarea'));
+            return Center(child: Text(localizations.taskNotFound));
           },
         ),
       ),
@@ -72,7 +74,7 @@ class _TaskDetailState extends State<TaskDetail> {
   }
 
   Widget _buildTaskCard(BuildContext context, Task task) {
-
+    final localizations = AppLocalizations.of(context)!;
     final progressColor = _getDividerColor(task.createdAt, task.dueDate, task.status);
     final formattedDates = _formatTaskDates(task);
 

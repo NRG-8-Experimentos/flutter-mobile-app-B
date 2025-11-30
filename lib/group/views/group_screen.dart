@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:synhub_flutter/group/bloc/group/group_event.dart' hide LoadMemberGroupEvent;
 
+import '../../l10n/app_localizations.dart';
 import '../../shared/bloc/member/member_bloc.dart';
 import '../../shared/bloc/member/member_event.dart';
 import '../../shared/bloc/member/member_state.dart' hide MemberGroupLoaded;
@@ -18,6 +19,7 @@ class GroupScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return MultiBlocProvider(
       providers: [
         BlocProvider<GroupBloc>(
@@ -33,13 +35,13 @@ class GroupScreen extends StatelessWidget {
           preferredSize: Size.fromHeight(kToolbarHeight),
           child: BlocBuilder<GroupBloc, GroupState>(
             builder: (context, state) {
-              String title = 'Group';
+              String title = localizations.group;
               if (state is MemberGroupLoaded) {
                 title = state.group.name;
               } else if (state is GroupLoading) {
-                title = 'Cargando...';
+                title = '${localizations.loading}...';
               } else if (state is GroupError) {
-                title = 'Error';
+                title = localizations.error;
               }
               return AppBar(
                 backgroundColor: Colors.white,
@@ -52,7 +54,7 @@ class GroupScreen extends StatelessWidget {
           listener: (context, state) {
             if (state is GroupLeftSuccessfully) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Has abandonado el grupo exitosamente.')),
+                SnackBar(content: Text(localizations.groupLeftSuccess)),
               );
               ApiClient.resetToken();
               Future.delayed(const Duration(milliseconds: 500), () {
@@ -77,7 +79,7 @@ class GroupScreen extends StatelessWidget {
               } else if (state is GroupError) {
                 return Center(child: Text(state.error));
               }
-              return const Center(child: Text('No hay datos'));
+              return Center(child: Text(localizations.noData));
             },
           ),
         ),
@@ -86,6 +88,7 @@ class GroupScreen extends StatelessWidget {
   }
 
   Widget _buildGroupContent(BuildContext context, Group group) {
+    final localizations = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Column(
@@ -123,7 +126,7 @@ class GroupScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Text('Tus compañeros de equipo:',
+          Text(localizations.teamMembersTitle,
               style:
               TextStyle(
                   fontSize: 24,
@@ -167,15 +170,15 @@ class GroupScreen extends StatelessWidget {
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: const Text('¿Abandonar grupo?', style: TextStyle(color: Color(0xFF1A4E85), fontWeight: FontWeight.bold)),
-                    content: const Text('¿Estás seguro de que deseas abandonar este grupo? Esta acción no se puede deshacer.'),
+                    title: Text(localizations.leaveGroupDialogTitle, style: TextStyle(color: Color(0xFF1A4E85), fontWeight: FontWeight.bold)),
+                    content: Text(localizations.leaveGroupDialogContent),
                     actions: [
                       TextButton(
                         style: TextButton.styleFrom(
                           backgroundColor: Color(0xFF1A4E85),
                         ),
                         onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Cancelar', style: TextStyle(color: Colors.white)),
+                        child: Text(localizations.cancel, style: TextStyle(color: Colors.white)),
                       ),
                       TextButton(
                         style: TextButton.styleFrom(
@@ -185,7 +188,7 @@ class GroupScreen extends StatelessWidget {
                           Navigator.of(context, rootNavigator: true).pop();
                           BlocProvider.of<MemberBloc>(parentContext, listen: false).add(LeaveGroupEvent());
                         },
-                        child: const Text('Abandonar', style: TextStyle(color: Colors.white)),
+                        child: Text(localizations.leaveGroupAction, style: TextStyle(color: Colors.white)),
                       ),
                     ],
                   ),
@@ -199,7 +202,7 @@ class GroupScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
-              child: Text('Abandonar Grupo', style: TextStyle(fontSize: 18)),
+              child: Text(localizations.leaveGroupButton, style: TextStyle(fontSize: 18)),
             ),
           )
         ],
