@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:synhub_flutter/requests/views/create_request_screen.dart';
 import 'package:synhub_flutter/tasks/views/task_detail.dart';
 
 import '../../l10n/app_localizations.dart';
@@ -287,24 +286,6 @@ class _TasksScreenState extends State<TasksScreen> {
                 ),
               ),
               if (task.status == "IN_PROGRESS") ...[
-                const SizedBox(height: 12),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                          context, 
-                          MaterialPageRoute(builder: (context) => CreateRequestScreen(task: task))
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFFFF9800),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: Text(localizations.sendComment, style: TextStyle(fontSize: 18, color: Colors.white)),
-                  ),
-                ),
                 const SizedBox(height: 12),
                 Center(
                   child: ElevatedButton(

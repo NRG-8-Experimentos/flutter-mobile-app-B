@@ -40,4 +40,13 @@ class RequestService {
       throw Exception('Failed to delete request');
     }
   }
+
+  Future<List<Request>> getRequestsByTaskId(int taskId) async {
+    final response = await ApiClient.get('tasks/$taskId/requests');
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonList = json.decode(response.body);
+      return jsonList.map((json) => Request.fromJson(json)).toList();
+    }
+    throw Exception('Failed to load requests for task');
+  }
 }
