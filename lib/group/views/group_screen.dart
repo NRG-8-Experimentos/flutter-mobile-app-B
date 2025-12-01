@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:synhub_flutter/group/bloc/group/group_event.dart' hide LoadMemberGroupEvent;
-
+import '../../l10n/app_localizations.dart';
 import '../../shared/bloc/member/member_bloc.dart';
 import '../../shared/bloc/member/member_event.dart';
 import '../../shared/bloc/member/member_state.dart' hide MemberGroupLoaded;
@@ -18,32 +18,41 @@ class GroupScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+
     return MultiBlocProvider(
       providers: [
         BlocProvider<GroupBloc>(
-          create: (context) => GroupBloc(groupService: GroupService())..add(LoadMemberGroupEvent() as GroupEvent),
+          create: (context) => GroupBloc(groupService: GroupService())
+            ..add(LoadMemberGroupEvent() as GroupEvent),
         ),
         BlocProvider<MemberBloc>(
           create: (context) => MemberBloc(memberService: MemberService()),
         ),
       ],
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(kToolbarHeight),
+          preferredSize: const Size.fromHeight(kToolbarHeight),
           child: BlocBuilder<GroupBloc, GroupState>(
             builder: (context, state) {
-              String title = 'Group';
+              String title = localizations.group;
               if (state is MemberGroupLoaded) {
                 title = state.group.name;
               } else if (state is GroupLoading) {
-                title = 'Cargando...';
+                title = '${localizations.loading}...';
               } else if (state is GroupError) {
-                title = 'Error';
+                title = localizations.error;
               }
               return AppBar(
-                backgroundColor: Colors.white,
-                title: Text(title, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+                title: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 24, fontWeight: FontWeight.bold,
+                    color: Theme.of(context).appBarTheme.foregroundColor,
+                  ),
+                ),
               );
             },
           ),
@@ -52,14 +61,14 @@ class GroupScreen extends StatelessWidget {
           listener: (context, state) {
             if (state is GroupLeftSuccessfully) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Has abandonado el grupo exitosamente.')),
+                SnackBar(content: Text(localizations.groupLeftSuccess)),
               );
               ApiClient.resetToken();
               Future.delayed(const Duration(milliseconds: 500), () {
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => const Login()),
-                  (route) => false,
+                      (route) => false,
                 );
               });
             } else if (state is MemberError) {
@@ -77,7 +86,7 @@ class GroupScreen extends StatelessWidget {
               } else if (state is GroupError) {
                 return Center(child: Text(state.error));
               }
-              return const Center(child: Text('No hay datos'));
+              return Center(child: Text(localizations.noData));
             },
           ),
         ),
@@ -86,6 +95,8 @@ class GroupScreen extends StatelessWidget {
   }
 
   Widget _buildGroupContent(BuildContext context, Group group) {
+    final localizations = AppLocalizations.of(context)!;
+
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Column(
@@ -93,65 +104,65 @@ class GroupScreen extends StatelessWidget {
         children: [
           Center(
             child: Card(
-              color: Color(0xFF4A90E2),
+              color: const Color(0xFF4A90E2),
               elevation: 5,
-              child:
-                Padding(
-                  padding: const EdgeInsets.all(14.0),
-                  child: Text('#${group.code}', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white)),
-                )
+              child: Padding(
+                padding: const EdgeInsets.all(14.0),
+                child: Text(
+                  '#${group.code}',
+                  style: const TextStyle(
+                      fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 12),
           Center(
             child: Card(
-              color: Color(0xFF1A4E85),
+              color: const Color(0xFF1A4E85),
               elevation: 5,
-              child:
-                Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Text(group.description,
-                      style:
-                      TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                      ),
-                    textAlign: TextAlign.justify,
-                  ),
-                )
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Text(
+                  group.description,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                  textAlign: TextAlign.justify,
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 12),
-          Text('Tus compañeros de equipo:',
-              style:
-              TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1A4E85)
-              )
+          Text(
+            localizations.teamMembersTitle,
+            style: const TextStyle(
+                fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF1A4E85)),
           ),
           const SizedBox(height: 12),
           Card(
-            color: Color(0xFFF5F5F5),
+            color: Theme.of(context).colorScheme.surfaceVariant,
             elevation: 5,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Card(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 elevation: 5,
-                  child: SizedBox(
-                  height: 350, // Altura máxima para evitar desbordes
+                child: SizedBox(
+                  height: 350,
                   child: ListView(
                     shrinkWrap: true,
-                    physics: AlwaysScrollableScrollPhysics(),
+                    physics: const AlwaysScrollableScrollPhysics(),
                     children: group.members.map((member) {
                       return ListTile(
                         leading: CircleAvatar(
                           backgroundImage: NetworkImage(member.imgUrl),
                         ),
-                        title: Text('${member.name} ${member.surname}'),
-                        subtitle: Text(member.username, style: TextStyle(color: Colors.grey[500])),
+                        title: Text('${member.name} ${member.surname}',
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface)),
+                        subtitle: Text(member.username,
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(.6))),
                       );
                     }).toList(),
                   ),
@@ -167,39 +178,45 @@ class GroupScreen extends StatelessWidget {
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: const Text('¿Abandonar grupo?', style: TextStyle(color: Color(0xFF1A4E85), fontWeight: FontWeight.bold)),
-                    content: const Text('¿Estás seguro de que deseas abandonar este grupo? Esta acción no se puede deshacer.'),
+                    title: Text(
+                      localizations.leaveGroupDialogTitle,
+                      style: const TextStyle(
+                          color: Color(0xFF1A4E85), fontWeight: FontWeight.bold),
+                    ),
+                    content: Text(localizations.leaveGroupDialogContent),
                     actions: [
                       TextButton(
                         style: TextButton.styleFrom(
-                          backgroundColor: Color(0xFF1A4E85),
+                          backgroundColor: const Color(0xFF1A4E85),
                         ),
                         onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Cancelar', style: TextStyle(color: Colors.white)),
+                        child: const Text('Cancel', style: TextStyle(color: Colors.white)),
                       ),
                       TextButton(
                         style: TextButton.styleFrom(
-                          backgroundColor: Color(0xFFF44336),
+                          backgroundColor: const Color(0xFFF44336),
                         ),
                         onPressed: () async {
                           Navigator.of(context, rootNavigator: true).pop();
-                          BlocProvider.of<MemberBloc>(parentContext, listen: false).add(LeaveGroupEvent());
+                          BlocProvider.of<MemberBloc>(parentContext, listen: false)
+                              .add(LeaveGroupEvent());
                         },
-                        child: const Text('Abandonar', style: TextStyle(color: Colors.white)),
+                        child: Text(localizations.leaveGroupAction,
+                            style: const TextStyle(color: Colors.white)),
                       ),
                     ],
                   ),
                 );
               },
               style: OutlinedButton.styleFrom(
-                backgroundColor: Color(0xFFF44336),
+                backgroundColor: const Color(0xFFF44336),
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
-              child: Text('Abandonar Grupo', style: TextStyle(fontSize: 18)),
+              child: Text(localizations.leaveGroupButton, style: const TextStyle(fontSize: 18)),
             ),
           )
         ],

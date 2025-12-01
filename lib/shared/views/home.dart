@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:synhub_flutter/shared/views/Login.dart';
-import 'package:synhub_flutter/statistics/bloc/statistics_bloc.dart';
-import 'package:synhub_flutter/statistics/bloc/statistics_event.dart';
-import 'package:synhub_flutter/statistics/bloc/statistics_state.dart';
-import 'package:synhub_flutter/statistics/services/statistics_service.dart';
-
 import '../../group/views/group_screen.dart';
+import '../../l10n/app_localizations.dart';
 import '../../statistics/views/statistics_screen.dart';
 import '../../tasks/models/task.dart';
 import '../../tasks/views/tasks_screen.dart';
@@ -16,19 +11,24 @@ import '../../shared/client/api_client.dart';
 import '../bloc/member/member_bloc.dart';
 import '../bloc/member/member_event.dart';
 import '../bloc/member/member_state.dart';
+import '../components/language_switcher_button.dart';
 import '../services/member_service.dart';
+import '../../statistics/bloc/statistics_bloc.dart';
+import '../../statistics/bloc/statistics_event.dart';
+import '../../statistics/bloc/statistics_state.dart';
+import '../../statistics/services/statistics_service.dart';
+import '../../requests/bloc/request_bloc.dart';
+import '../../requests/services/request_service.dart';
+import '../../tasks/bloc/task/task_bloc.dart';
+import '../../tasks/bloc/task/task_event.dart';
+import '../../tasks/bloc/task/task_state.dart';
 
-const List<Map<String, dynamic>> drawerOptions = [
-  {'label': 'Grupo', 'icon': Icons.groups, 'route': 'Group'},
-  {'label': 'Solicitudes', 'icon': Icons.mail_outline, 'route': 'Requests'},
-  {'label': 'Tareas', 'icon': Icons.assignment_outlined, 'route': 'Tasks'},
-  {'label': 'Mi desempeño', 'icon': Icons.area_chart, 'route': 'AnalyticsAndReports'},
-  {'label': 'Cerrar sesión', 'icon': Icons.logout, 'route': 'Login'},
-];
+// NUEVO
+import '../components/appearance_switcher_button.dart';
+import '../views/Login.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
-
   @override
   State<Home> createState() => _HomeState();
 }
@@ -42,7 +42,6 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    // Lanzar el evento para obtener los datos del miembro
     Future.microtask(() {
       context.read<MemberBloc>().add(FetchMemberDetailsEvent());
     });
@@ -50,7 +49,7 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-
+    final localizations = AppLocalizations.of(context)!;
     return BlocListener<MemberBloc, MemberState>(
       listener: (context, state) {
         if (state is MemberLoaded) {
@@ -63,10 +62,17 @@ class _HomeState extends State<Home> {
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: Colors.white,
-          title: const Text('SynHub', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black)),
+          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+          title: Text(
+            'SynHub',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).appBarTheme.foregroundColor,
+            ),
+          ),
         ),
         drawerEnableOpenDragGesture: true,
         drawer: _CustomDrawer(
@@ -76,13 +82,14 @@ class _HomeState extends State<Home> {
           onNavigate: (route) {
             Navigator.pop(context);
             if (route == 'Group') {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => GroupScreen()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const GroupScreen()));
             } else if (route == 'Group/Invitations') {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const RequestsScreen()));
-            } else if (route == 'Group/Members') {
-              // Implementa la navegación a la pantalla de miembros
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const RequestsScreen()));
             } else if (route == 'Tasks') {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const TasksScreen()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const TasksScreen()));
             } else if (route == 'AnalyticsAndReports') {
               if (_memberId.isNotEmpty) {
                 Navigator.push(
@@ -98,168 +105,213 @@ class _HomeState extends State<Home> {
                 );
               }
             } else if (route == 'Requests') {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const RequestsScreen()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const RequestsScreen()));
             } else if (route == 'Login') {
               ApiClient.resetToken();
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const Login()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const Login()));
             }
           },
         ),
         body: PopScope(
           canPop: false,
           child: BlocProvider<MemberBloc>(
-            create: (context) => MemberBloc(memberService: MemberService())..add(LoadNextTaskEvent()),
+            create: (context) =>
+            MemberBloc(memberService: MemberService())..add(LoadNextTaskEvent()),
             child: BlocBuilder<MemberBloc, MemberState>(
               builder: (context, state) {
-                // --- MÉTRICAS RESUMIDAS ---
+                // MÉTRICAS RESUMIDAS
                 Widget metricsSummary = (_memberId.isNotEmpty)
                     ? BlocProvider(
-                  create: (_) => StatisticsBloc(StatisticsService())..add(LoadMemberStatistics(_memberId)),
-                  child: BlocBuilder<StatisticsBloc, StatisticsState>(
-                    builder: (context, statsState) {
-                      if (statsState is StatisticsLoaded) {
-                        final overview = statsState.statistics.overview;
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => StatisticsScreen(
-                                  memberId: _memberId,
-                                  memberName: '$_name $_surname',
-                                  username: _name,
-                                  profileImageUrl: _imgUrl,
-                                ),
-                              ),
-                            );
-                          },
-                          child: Card(
-                            color: Color(0xFF1A4E85),
-                            elevation: 4,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Resumen de métricas',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                      SizedBox(height: 6),
-                                      Row(
-                                        children: [
-                                          Icon(Icons.check_circle, color: Colors.greenAccent, size: 20),
-                                          SizedBox(width: 4),
-                                          Text(
-                                            'Terminadas: ${overview.done}',
-                                            style: TextStyle(color: Colors.white, fontSize: 14),
-                                          ),
-                                          SizedBox(width: 16),
-                                          Icon(Icons.autorenew, color: Colors.blueAccent, size: 20),
-                                          SizedBox(width: 4),
-                                          Text(
-                                            'En progreso: ${overview.inProgress}',
-                                            style: TextStyle(color: Colors.white, fontSize: 14),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  Icon(Icons.arrow_forward_ios, color: Colors.white, size: 20),
-                                ],
+                  create: (_) => StatisticsBloc(StatisticsService())
+                    ..add(LoadMemberStatistics(_memberId)),
+                  child:
+                  BlocBuilder<StatisticsBloc, StatisticsState>(builder: (context, statsState) {
+                    if (statsState is StatisticsLoaded) {
+                      final overview = statsState.statistics.overview;
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => StatisticsScreen(
+                                memberId: _memberId,
+                                memberName: '$_name $_surname',
+                                username: _name,
+                                profileImageUrl: _imgUrl,
                               ),
                             ),
+                          );
+                        },
+                        child: Card(
+                          color: const Color(0xFF1A4E85),
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16)),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 18, horizontal: 20),
+                            child: Row(
+                              mainAxisAlignment:
+                              MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment:
+                                  CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Resumen de métricas',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.check_circle,
+                                            color: Colors.greenAccent,
+                                            size: 20),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          'Completadas: ${overview.done}',
+                                          style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 14),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        const Icon(Icons.autorenew,
+                                            color: Colors.blueAccent,
+                                            size: 20),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          'En progreso: ${overview.inProgress}',
+                                          style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 14),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                const Icon(Icons.arrow_forward_ios,
+                                    color: Colors.white, size: 20),
+                              ],
+                            ),
                           ),
-                        );
-                      } else if (statsState is StatisticsLoading) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Center(child: CircularProgressIndicator()),
-                        );
-                      } else {
-                        return SizedBox.shrink();
-                      }
-                    },
-                  ),
+                        ),
+                      );
+                    } else if (statsState is StatisticsLoading) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    } else {
+                      return const SizedBox.shrink();
+                    }
+                  }),
                 )
-                    : SizedBox.shrink();
-                // --- FIN MÉTRICAS RESUMIDAS ---
+                    : const SizedBox.shrink();
 
                 if (state is NextTaskLoading) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 } else if (state is NextTaskLoaded) {
                   final task = state.task;
                   return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // --- Insertar resumen de métricas aquí ---
                         metricsSummary,
-                        if (_memberId.isNotEmpty) SizedBox(height: 18),
-                        // --- Fin resumen de métricas ---
-                        Text('Tu tarea más cercana a vencer', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1A4E85))),
+                        if (_memberId.isNotEmpty) const SizedBox(height: 18),
+                        Text(
+                          localizations.taskDueSoon,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1A4E85),
+                          ),
+                        ),
                         const SizedBox(height: 16),
                         SizedBox(
                           width: double.infinity,
                           child: Card(
-                            color: Color(0xFFF5F5F5),
+                            color: Theme.of(context).colorScheme.surfaceVariant,
                             elevation: 5,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
+                                borderRadius: BorderRadius.circular(20)),
                             child: Padding(
                               padding: const EdgeInsets.all(16),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Center(child: Text(task.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+                                  Center(
+                                    child: Text(
+                                      task.title,
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface,
+                                      ),
+                                    ),
+                                  ),
                                   const SizedBox(height: 8),
                                   Container(
                                     height: 2,
-                                    decoration: BoxDecoration(
-                                        color: Colors.black
-                                    ),
+                                    color: Theme.of(context).dividerColor,
                                   ),
                                   ConstrainedBox(
-                                      constraints: BoxConstraints(
-                                        maxHeight: 100,
-                                        minWidth: double.infinity,
+                                    constraints: const BoxConstraints(
+                                      maxHeight: 100,
+                                      minWidth: double.infinity,
+                                    ),
+                                    child: Card(
+                                      color: Theme.of(context).cardColor,
+                                      margin:
+                                      const EdgeInsets.symmetric(vertical: 10),
+                                      elevation: 5,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
                                       ),
-                                      child: Card(
-                                        color: Colors.white,
-                                        margin: EdgeInsets.symmetric(vertical: 10),
-                                        elevation: 5,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(20),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(15.0),
+                                        child: Text(
+                                          task.description,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface,
+                                          ),
                                         ),
-                                        child:
-                                        Padding(
-                                          padding: const EdgeInsets.all(15.0),
-                                          child: Text(task.description, style: const TextStyle(fontSize: 16)),
-                                        ),
-                                      )
+                                      ),
+                                    ),
                                   ),
-                                  SizedBox(height: 12),
+                                  const SizedBox(height: 12),
                                   Center(
                                     child: Text(
                                       _formatTaskDates(task),
-                                      style: const TextStyle(fontSize: 14),
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface,
+                                      ),
                                     ),
                                   ),
-                                  SizedBox(height: 12),
+                                  const SizedBox(height: 12),
                                   Container(
                                     height: 8,
                                     decoration: BoxDecoration(
-                                      color: _getDividerColor(task.createdAt, task.dueDate, task.status),
+                                      color: _getDividerColor(
+                                          task.createdAt,
+                                          task.dueDate,
+                                          task.status),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                   ),
@@ -273,27 +325,38 @@ class _HomeState extends State<Home> {
                   );
                 } else if (state is NoNextTaskAvailable) {
                   return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // --- Insertar resumen de métricas aquí ---
                         metricsSummary,
-                        if (_memberId.isNotEmpty) SizedBox(height: 18),
-                        // --- Fin resumen de métricas ---
-                        Text('Tu tarea más cercana', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1A4E85))),
+                        if (_memberId.isNotEmpty) const SizedBox(height: 18),
+                        Text(
+                          localizations.taskDueSoon,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1A4E85),
+                          ),
+                        ),
                         const SizedBox(height: 16),
                         SizedBox(
                           width: double.infinity,
                           child: Card(
-                            color: Color(0xFF1A4E85),
+                            color: const Color(0xFF1A4E85),
                             elevation: 5,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
+                                borderRadius: BorderRadius.circular(20)),
                             child: Padding(
                               padding: const EdgeInsets.all(16),
-                              child: Center(child: Text('No tienes tareas próximas', style: const TextStyle(fontSize: 16, color: Colors.white))),
+                              child: Center(
+                                child: Text(
+                                  localizations.noUpcomingTasks,
+                                  style: const TextStyle(
+                                      fontSize: 16, color: Colors.white),
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -303,7 +366,7 @@ class _HomeState extends State<Home> {
                 } else if (state is NextTaskError) {
                   return Center(child: Text(state.message));
                 }
-                return Center(child: CircularProgressIndicator());
+                return const Center(child: CircularProgressIndicator());
               },
             ),
           ),
@@ -313,45 +376,33 @@ class _HomeState extends State<Home> {
   }
 
   Color _getDividerColor(String createdAt, String dueDate, String status) {
-    if (status == "COMPLETED") return Color(0xFF4CAF50); // Verde para tareas completadas
-    if (status == "ON_HOLD") return Color(0xFFFF832A); // Naranja para tareas en espera
-    if (status == "DONE") return Color(0xFF4A90E2); // Azul para tareas hechas
-    if(status == "EXPIRED") return Color(0xFFF44336); // Rojo para tareas vencidas
+    if (status == "COMPLETED") return const Color(0xFF4CAF50);
+    if (status == "ON_HOLD") return const Color(0xFFFF832A);
+    if (status == "DONE") return const Color(0xFF4A90E2);
+    if (status == "EXPIRED") return const Color(0xFFF44336);
     try {
-      // Parsear fechas considerando la zona horaria
       final created = _parseDateWithTimeZone(createdAt);
       final due = _parseDateWithTimeZone(dueDate);
       final now = DateTime.now();
-
       final totalSeconds = due.difference(created).inSeconds.toDouble();
       final secondsPassed = now.difference(created).inSeconds.toDouble();
-
       if (totalSeconds <= 0) return const Color(0xFFF44336);
-
       final progress = (secondsPassed / totalSeconds).clamp(0.0, 1.0);
-
-      if (now.isAfter(due)) {
-        return const Color(0xFFF44336); // Rojo - Tarea vencida
-      } else if (progress < 0.7) {
-        return const Color(0xFF4CAF50); // Verde - Buen progreso
-      } else {
-        return const Color(0xFFFDD634); // Amarillo - Progreso crítico
-      }
-    } catch (e) {
-      return const Color(0xFF939393); // Verde por defecto si hay error
+      if (now.isAfter(due)) return const Color(0xFFF44336);
+      if (progress < 0.7) return const Color(0xFF4CAF50);
+      return const Color(0xFFFDD634);
+    } catch (_) {
+      return const Color(0xFF939393);
     }
   }
 
   DateTime _parseDateWithTimeZone(String dateString) {
     try {
-      // Intenta parsear como fecha con zona horaria (ISO 8601)
       return DateTime.parse(dateString).toLocal();
-    } catch (e) {
+    } catch (_) {
       try {
-        // Intenta parsear como fecha simple
         return DateFormat("yyyy-MM-dd").parse(dateString);
-      } catch (e) {
-        // Si falla, devuelve la fecha actual como fallback
+      } catch (_) {
         return DateTime.now();
       }
     }
@@ -361,12 +412,10 @@ class _HomeState extends State<Home> {
     try {
       final createdAt = _parseDateWithTimeZone(task.createdAt);
       final dueDate = _parseDateWithTimeZone(task.dueDate);
-
       final format1 = DateFormat('dd/MM/yyyy');
       final format2 = DateFormat('dd/MM/yyyy HH:mm');
       return '${format1.format(createdAt)} - ${format2.format(dueDate)}';
-    } catch (e) {
-      // Si falla el parsing, usar los primeros 10 caracteres
+    } catch (_) {
       return '${task.createdAt.substring(0, 10)} - ${task.dueDate.substring(0, 10)}';
     }
   }
@@ -387,7 +436,9 @@ class _CustomDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     const double gap = 15.0;
+
     return Drawer(
       child: Container(
         color: const Color(0xFF1A4E85),
@@ -396,10 +447,8 @@ class _CustomDrawer extends StatelessWidget {
           children: [
             const SizedBox(height: 60),
             Center(
-              child: Text(
-                '$name $surname',
-                style: const TextStyle(fontSize: 24, color: Colors.white),
-              ),
+              child: Text('$name $surname',
+                  style: const TextStyle(fontSize: 24, color: Colors.white)),
             ),
             const SizedBox(height: gap),
             Center(
@@ -423,7 +472,8 @@ class _CustomDrawer extends StatelessWidget {
                     imgUrl,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
-                      return const Icon(Icons.person, size: 80, color: Colors.white);
+                      return const Icon(Icons.person,
+                          size: 80, color: Colors.white);
                     },
                   )
                       : const Icon(Icons.person, size: 80, color: Colors.white),
@@ -433,32 +483,46 @@ class _CustomDrawer extends StatelessWidget {
             const SizedBox(height: gap),
             const Divider(color: Colors.white),
             const SizedBox(height: gap),
+
             _buildDrawerItem(
               icon: Icons.groups,
-              label: 'Grupo',
+              label: localizations.group,
               onTap: () => onNavigate('Group'),
             ),
             _buildDrawerItem(
               icon: Icons.assignment_outlined,
-              label: 'Tareas',
+              label: localizations.tasks,
               onTap: () => onNavigate('Tasks'),
             ),
             _buildDrawerItem(
               icon: Icons.bar_chart,
-              label: 'Mi desempeño',
+              label: localizations.performance,
               onTap: () => onNavigate('AnalyticsAndReports'),
             ),
             _buildDrawerItem(
               icon: Icons.fact_check,
-              label: 'Solicitudes',
+              label: localizations.requests,
               onTap: () => onNavigate('Requests'),
             ),
+
             const SizedBox(height: gap),
             const Divider(color: Colors.white),
             const SizedBox(height: gap),
+
+            // Si tus botones NO tienen constructor const, déjalos así:
+            LanguageSwitcherButton(),
+            const SizedBox(height: gap),
+
+            // Debajo del language switcher:
+            AppearanceSwitcherButton(),
+
+            const SizedBox(height: gap),
+            const Divider(color: Colors.white),
+            const SizedBox(height: gap),
+
             _buildDrawerItem(
               icon: Icons.logout,
-              label: 'Cerrar Sesión',
+              label: localizations.signOut,
               onTap: () => onNavigate('Login'),
             ),
           ],
@@ -473,7 +537,7 @@ class _CustomDrawer extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return ListTile(
-      leading: Icon(icon, color: Colors.white),
+      leading: Icon(icon, color: Colors.white), // <-- sin const
       title: Text(
         label,
         style: const TextStyle(fontSize: 17, color: Colors.white),
